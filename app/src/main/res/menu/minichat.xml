@@ -1,0 +1,14 @@
+<menu xmlns:tools="http://schemas.android.com/tools"
+    tools:context="com.telnet.karibou.MinichatFragment">
+    <!--<item android:id="@+id/action_search"
+          android:icon="@drawable/ic_action_refresh"
+          android:title="Rechercher"
+          android:showAsAction="ifRoom" />
+    <item
+        android:id="@+id/action_settings"
+        android:orderInCategory="100"
+        android:title="@string/action_settings"
+        app:showAsAction="never"/>-->
+
+
+</menu>

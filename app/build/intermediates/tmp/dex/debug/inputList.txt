@@ -1,0 +1,3 @@
+C:\Utilisateurs\a551894\Documents\Perso\Karibou2-Mobile\app\build\intermediates\classes\debug
+C:\Utilisateurs\a551894\Documents\Perso\Karibou2-Mobile\app\build\intermediates\pre-dexed\debug\classes-47e844833597eae522b6e0df63af64eebaf7f96e.jar
+C:\Utilisateurs\a551894\Documents\Perso\Karibou2-Mobile\app\build\intermediates\pre-dexed\debug\support-v4-19.1.0-b5d4c89ce2cabad60622cc7f91f2e74404a361e8.jar
