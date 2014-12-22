@@ -49,8 +49,6 @@ public class ReadFlashmailTask extends KaribouTask<String, Void, String> {
             List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(1);
             nameValuePairs.add(new BasicNameValuePair("flashmailid", id));
 
-            Log.d("SendFlashmail", url);
-            Log.d("SendFlashmail", id);
             doPost(url, nameValuePairs);
         } catch (IOException e) {
             Log.e("ReadFlashmailTask", e.getMessage());
