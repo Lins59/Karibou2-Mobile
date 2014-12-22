@@ -1,11 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-
     <string name="app_name" translatable="false">Karibou²</string>
+    <string name="login" translatable="false">Login</string>
+    <string name="password" translatable="false">Mot de passe</string>
+    <string name="connection" translatable="false">Connexion</string>
     <string name="action_settings" translatable="false">Settings</string>
     <string name="title_activity_minichat" translatable="false">Karibou²</string>
+    <string name="write_or_answer" translatable="false">Ecrire ou répondre à</string>
+    <string name="cancel" translatable="false">Annuler</string>
+    <string name="send" translatable="false">Envoyer</string>
     <string name="choose_action" translatable="false">Choisir l\'action ...</string>
     <string name="action_answer" translatable="false">Répondre</string>
     <string name="action_mark_read" translatable="false">Marquer comme lu</string>
-
+    <string name="no_new_flashmails" translatable="false">Vous n\'avez pas de nouveaux flashmails</string>
+    <string name="answering_to" translatable="false">En réponse à :</string>
 </resources>

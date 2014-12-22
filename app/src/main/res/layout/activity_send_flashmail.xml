@@ -10,10 +10,10 @@
         android:layout_height="wrap_content"
         android:background="@color/k2_light_blue"
         android:paddingBottom="10dp"
-        android:paddingLeft="@dimen/activity_horizontal_margin"
-        android:paddingRight="@dimen/activity_horizontal_margin"
-        android:paddingTop="@dimen/activity_vertical_margin"
-        android:text="Ecrire ou répondre à"
+        android:paddingLeft="@dimen/activity_vertical_margin"
+        android:paddingRight="@dimen/activity_vertical_margin"
+        android:paddingTop="@dimen/activity_horizontal_margin"
+        android:text="@string/write_or_answer"
         android:textAppearance="?android:attr/textAppearanceSmall" />
 
     <TextView
@@ -23,9 +23,8 @@
         android:layout_below="@id/info"
         android:background="@color/k2_light_blue"
         android:paddingBottom="10dp"
-        android:paddingLeft="@dimen/activity_horizontal_margin"
-        android:paddingRight="@dimen/activity_horizontal_margin"
-        android:text="Untel"
+        android:paddingLeft="@dimen/activity_vertical_margin"
+        android:paddingRight="@dimen/activity_vertical_margin"
         android:textAppearance="?android:attr/textAppearanceLarge" />
 
     <View
@@ -58,18 +57,16 @@
             android:id="@+id/cancel"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_below="@id/messageField"
             android:layout_margin="5sp"
             android:layout_weight="1"
-            android:text="Annuler" />
+            android:text="@string/cancel" />
 
         <Button
             android:id="@+id/send"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_below="@id/messageField"
             android:layout_margin="5sp"
             android:layout_weight="1"
-            android:text="Envoyer" />
+            android:text="@string/send" />
     </TableRow>
 </RelativeLayout>

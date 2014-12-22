@@ -19,7 +19,6 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_weight="1.8"
-            android:text="Envoyeur"
             android:textAppearance="?android:attr/textAppearanceLarge" />
 
     </TableRow>
@@ -38,7 +37,6 @@
             android:id="@+id/date"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Date"
             android:textStyle="bold" />
     </TableRow>
 
@@ -60,7 +58,7 @@
             android:gravity="center_vertical"
             android:paddingLeft="16dp"
             android:paddingRight="4dp"
-            android:text="En réponse à :"
+            android:text="@string/answering_to"
             android:textAppearance="?android:attr/textAppearanceSmall"
             android:visibility="gone" />
 
@@ -72,7 +70,6 @@
             android:background="@drawable/rounded_corners_old_message"
             android:paddingLeft="16dp"
             android:paddingRight="16dp"
-            android:text="Message précédent igjaitjiqjqsifjsqifjqisjfsqijfsijfqiqsjf\n Sur plusieurs lignes"
             android:textAppearance="?android:attr/textAppearanceSmall"
             android:visibility="gone" />
     </TableRow>
@@ -90,7 +87,6 @@
             android:layout_height="wrap_content"
             android:autoLink="web"
             android:linksClickable="true"
-            android:text="Message"
             android:textAppearance="?android:attr/textAppearanceSmall" />
     </TableRow>
 </TableLayout>
