@@ -1,7 +1,6 @@
 package com.telnet.adapters;
 
 import android.app.Activity;
-import android.graphics.Color;
 import android.text.Html;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -19,14 +18,12 @@ import java.util.List;
 public class UserListAdapter extends ArrayAdapter<User> {
     private final Activity context;
     private final List<User> users;
-    private final Integer imageId;
 
     public UserListAdapter(Activity context,
-                           List<User> users, Integer imageId) {
+                           List<User> users) {
         super(context, R.layout.single_user, users);
         this.context = context;
         this.users = users;
-        this.imageId = imageId;
     }
 
     public List<User> getUsers() {
@@ -45,7 +42,7 @@ public class UserListAdapter extends ArrayAdapter<User> {
         String away = "";
         if (user.isAway()) {
             away = " (Absent) ";
-            rowView.setBackgroundColor(Color.parseColor("#EEF5F9"));
+            rowView.setBackgroundColor(view.getResources().getColor(R.color.k2_light_blue));
         }
         String message = "";
         if (user.getMessage() != null && !user.getMessage().equals("null")) {

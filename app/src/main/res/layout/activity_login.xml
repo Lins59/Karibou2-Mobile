@@ -49,6 +49,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="60dp"
+            android:background="@color/k2_light_blue"
             android:padding="10dp"
             android:text="Connexion" />
 

@@ -12,11 +12,9 @@ import android.widget.TextView;
 import com.telnet.karibou.R;
 import com.telnet.objects.Message;
 
-import java.text.SimpleDateFormat;
 import java.util.List;
 
 public class MinichatAdapter extends ArrayAdapter<Message> {
-    private static SimpleDateFormat formater = new SimpleDateFormat("dd/MM/yy 'à' HH:mm");
     private final Activity context;
     private final List<Message> messages;
 
@@ -49,7 +47,7 @@ public class MinichatAdapter extends ArrayAdapter<Message> {
                 message.getMessage() + "<br />"));
 
         if (position % 2 == 1) {
-            rowView.setBackgroundColor(Color.parseColor("#EEF5F9"));
+            rowView.setBackgroundColor(view.getResources().getColor(R.color.k2_light_blue));
         } else {
             rowView.setBackgroundColor(Color.WHITE);
         }

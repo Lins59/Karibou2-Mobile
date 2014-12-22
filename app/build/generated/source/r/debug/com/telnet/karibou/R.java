@@ -695,10 +695,13 @@ containing a value of this type.
         public static final int abc_split_action_bar_is_narrow=0x7f050005;
     }
     public static final class color {
-        public static final int abc_search_url_text_holo=0x7f060003;
+        public static final int abc_search_url_text_holo=0x7f060006;
         public static final int abc_search_url_text_normal=0x7f060000;
         public static final int abc_search_url_text_pressed=0x7f060001;
         public static final int abc_search_url_text_selected=0x7f060002;
+        public static final int k2_light_blue=0x7f060003;
+        public static final int k2_red=0x7f060004;
+        public static final int k2_white=0x7f060005;
     }
     public static final class dimen {
         public static final int abc_action_bar_default_height=0x7f070000;
@@ -813,12 +816,11 @@ containing a value of this type.
         public static final int abc_textfield_searchview_holo_light=0x7f020054;
         public static final int abc_textfield_searchview_right_holo_dark=0x7f020055;
         public static final int abc_textfield_searchview_right_holo_light=0x7f020056;
-        public static final int enveloppe=0x7f020057;
-        public static final int ic_action_refresh=0x7f020058;
-        public static final int ic_launcher=0x7f020059;
-        public static final int k2=0x7f02005a;
-        public static final int rounded_corners=0x7f02005b;
-        public static final int rounded_corners_old_message=0x7f02005c;
+        public static final int ic_action_refresh=0x7f020057;
+        public static final int ic_launcher=0x7f020058;
+        public static final int k2=0x7f020059;
+        public static final int rounded_corners=0x7f02005a;
+        public static final int rounded_corners_old_message=0x7f02005b;
     }
     public static final class id {
         public static final int action_bar=0x7f08001c;

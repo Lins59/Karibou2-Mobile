@@ -47,7 +47,7 @@ public class UserListFragment extends Fragment {
                 startActivity(intent);
             }
         });
-        adapter = new UserListAdapter(getActivity(), new ArrayList<User>(), R.drawable.enveloppe);
+        adapter = new UserListAdapter(getActivity(), new ArrayList<User>());
         userList.setAdapter(adapter);
 
         // Timer for refresh will be set in onResume
