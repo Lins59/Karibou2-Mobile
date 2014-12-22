@@ -19,6 +19,10 @@ public class MinichatParser {
         int len = jsonArray.length();
         for (int i = 0; i < len; i++) {
             JSONObject obj = jsonArray.getJSONObject(i);
+            // Don't process messages like score
+            if (obj.isNull("type") || !"msg".equals(obj.getString("type"))) {
+                continue;
+            }
             String message = (String) obj.get("post");
             Integer userId = obj.getInt("user_id");
 
