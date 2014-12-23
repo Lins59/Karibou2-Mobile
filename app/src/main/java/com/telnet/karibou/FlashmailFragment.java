@@ -28,6 +28,7 @@ import com.telnet.requests.FlashmailTask;
 import com.telnet.requests.ReadFlashmailTask;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -42,7 +43,7 @@ public class FlashmailFragment extends Fragment {
     private Handler handler;
     private Timer timer;
     private TimerTask doAsynchronousTask;
-    private ArrayList<Integer> notificationsDisplayed = new ArrayList<Integer>();
+    private List<Integer> notificationsDisplayed = new ArrayList<Integer>();
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -137,18 +138,25 @@ public class FlashmailFragment extends Fragment {
         // empty all elements
         adapter.clear();
 
-        adapter.addAll(flashmails);
+        if (flashmails.size() > 0) {
+            adapter.addAll(flashmails);
 
-        // Add notification
-        if (isAdded()) {
-            createNotifications(flashmails);
+            // Add notification
+            if (isAdded()) {
+                List<Integer> newNotifications = createNotifications(flashmails);
+                compareNotifications(this.notificationsDisplayed, newNotifications);
+                this.notificationsDisplayed = newNotifications;
+            }
+        } else {
+            removeAllNotifications();
         }
 
         // Refresh adapter
         adapter.notifyDataSetChanged();
     }
 
-    public void createNotifications(List<Flashmail> flashmails) {
+    public List<Integer> createNotifications(List<Flashmail> flashmails) {
+        List<Integer> newNotifications = new ArrayList<Integer>();
         if (flashmails != null) {
             NotificationManager notificationManager = (NotificationManager) getActivity().getSystemService(Context.NOTIFICATION_SERVICE);
             int dot = 200;      // Length of a Morse Code "dot" in milliseconds
@@ -195,9 +203,25 @@ public class FlashmailFragment extends Fragment {
                     Notification notification = builder.build();
                     notification.vibrate = vibratePattern;
                     notificationManager.notify(id, notification);
-                    notificationsDisplayed.add(id);
                 }
+                newNotifications.add(id);
             }
+        }
+        return newNotifications;
+    }
+
+    public void compareNotifications(Collection<Integer> oldNotifications, Collection<Integer> newNotifications) {
+        oldNotifications.removeAll(newNotifications);
+        NotificationManager notificationManager = (NotificationManager) getActivity().getSystemService(Context.NOTIFICATION_SERVICE);
+        for (Integer id : oldNotifications) {
+            notificationManager.cancel(id);
+        }
+    }
+
+    public void removeAllNotifications() {
+        NotificationManager notificationManager = (NotificationManager) getActivity().getSystemService(Context.NOTIFICATION_SERVICE);
+        for (Integer id : notificationsDisplayed) {
+            notificationManager.cancel(id);
         }
     }
 
