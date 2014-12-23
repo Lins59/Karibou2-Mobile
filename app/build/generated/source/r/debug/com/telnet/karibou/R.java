@@ -989,10 +989,12 @@ containing a value of this type.
         public static final int ok=0x7f0a0018;
         public static final int password=0x7f0a0019;
         public static final int send=0x7f0a001a;
-        public static final int taking_risk=0x7f0a001b;
-        public static final int title_activity_minichat=0x7f0a001c;
-        public static final int write_or_answer=0x7f0a001d;
-        public static final int wrong_password=0x7f0a001e;
+        public static final int sent_you=0x7f0a001b;
+        public static final int taking_risk=0x7f0a001c;
+        public static final int title_activity_minichat=0x7f0a001d;
+        public static final int write_or_answer=0x7f0a001e;
+        public static final int wrong_password=0x7f0a001f;
+        public static final int you_have_received_a_flashmail=0x7f0a0020;
     }
     public static final class style {
         /** 

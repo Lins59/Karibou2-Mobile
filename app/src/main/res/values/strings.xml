@@ -14,6 +14,8 @@
     <string name="action_answer" translatable="false">Répondre</string>
     <string name="action_mark_read" translatable="false">Marquer comme lu</string>
     <string name="no_new_flashmails" translatable="false">Vous n\'avez pas de nouveaux flashmails</string>
+    <string name="you_have_received_a_flashmail" translatable="false">"Vous avez reçu un flashmail !"</string>
+    <string name="sent_you" translatable="false">"vous a envoyé"</string>
     <string name="answering_to" translatable="false">En réponse à :</string>
     <string name="no_connection" translatable="false">Il semblerait que vous ne soyez pas connecté au WiFi. L\'application pourrait ne pas fonctionner et entraîner la fin de l\'humanité.</string>
     <string name="taking_risk" translatable="false">Je prends le risque</string>

@@ -192,11 +192,12 @@ public class FlashmailFragment extends Fragment {
                     builder.setPriority(Notification.FLAG_HIGH_PRIORITY);
                     builder.setAutoCancel(true);
                     //builder.setWhen(0);
-                    builder.addAction(R.drawable.ic_launcher, "Répondre", pAnswerIntent);
-                    builder.addAction(R.drawable.ic_action_refresh, "Marquer comme lu", pReadFlashmailIntent);
+                    builder.addAction(R.drawable.ic_launcher, getResources().getString(R.string.action_answer), pAnswerIntent);
+                    builder.addAction(R.drawable.ic_action_refresh, getResources().getString(R.string.action_mark_read), pReadFlashmailIntent);
                     builder.setContentIntent(pendingIntent);
-                    builder.setContentTitle("Vous avez reçu un flashmail !");
-                    builder.setContentText(flashmail.getSender().getPseudo() + " vous a envoyé : " + flashmail.getMessage());
+                    builder.setContentTitle(getResources().getString(R.string.you_have_received_a_flashmail));
+                    builder.setStyle(new NotificationCompat.BigTextStyle().bigText(flashmail.getSender().getPseudo() + " " + getResources().getString(R.string.sent_you) + " : " + flashmail.getMessage()));
+                    builder.setContentText(getResources().getString(R.string.you_have_received_a_flashmail));
                     builder.setSmallIcon(R.drawable.ic_launcher);
                     builder.setVibrate(vibratePattern);
 
