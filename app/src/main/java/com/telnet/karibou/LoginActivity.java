@@ -72,9 +72,9 @@ public class LoginActivity extends ActionBarActivity {
             }
         } else {
             AlertDialog.Builder alertBuilder = new AlertDialog.Builder(this);
-            alertBuilder.setMessage("Il semblerait que vous ne soyez pas connecté au WiFi. L'application pourrait ne pas fonctionner et entraîner la fin de l'humanité.");
+            alertBuilder.setMessage(R.string.no_connection);
             alertBuilder.setCancelable(false);
-            alertBuilder.setPositiveButton("Je prends le risque",
+            alertBuilder.setPositiveButton(R.string.taking_risk,
                     new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int id) {
                             dialog.cancel();
@@ -132,6 +132,18 @@ public class LoginActivity extends ActionBarActivity {
         } catch (JSONException e) {
             login.setText(prefs.getString("login", ""));
             pwd.setText("");
+            AlertDialog.Builder alertBuilder = new AlertDialog.Builder(this);
+            alertBuilder.setMessage(R.string.wrong_password);
+            alertBuilder.setCancelable(false);
+            alertBuilder.setPositiveButton("OK",
+                    new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int id) {
+                            dialog.cancel();
+                        }
+                    });
+
+            AlertDialog alert = alertBuilder.create();
+            alert.show();
             toggleView(false);
         }
     }

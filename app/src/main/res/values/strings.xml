@@ -14,4 +14,7 @@
     <string name="action_mark_read" translatable="false">Marquer comme lu</string>
     <string name="no_new_flashmails" translatable="false">Vous n\'avez pas de nouveaux flashmails</string>
     <string name="answering_to" translatable="false">En réponse à :</string>
+    <string name="no_connection" translatable="false">Il semblerait que vous ne soyez pas connecté au WiFi. L\'application pourrait ne pas fonctionner et entraîner la fin de l\'humanité.</string>
+    <string name="taking_risk" translatable="false">Je prends le risque</string>
+    <string name="wrong_password" translatable="false">Vérifiez vos identifiants et votre connexion</string>
 </resources>

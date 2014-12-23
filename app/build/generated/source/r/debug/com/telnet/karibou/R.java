@@ -976,11 +976,14 @@ containing a value of this type.
         public static final int choose_action=0x7f0a0013;
         public static final int connection=0x7f0a0014;
         public static final int login=0x7f0a0015;
-        public static final int no_new_flashmails=0x7f0a0016;
-        public static final int password=0x7f0a0017;
-        public static final int send=0x7f0a0018;
-        public static final int title_activity_minichat=0x7f0a0019;
-        public static final int write_or_answer=0x7f0a001a;
+        public static final int no_connection=0x7f0a0016;
+        public static final int no_new_flashmails=0x7f0a0017;
+        public static final int password=0x7f0a0018;
+        public static final int send=0x7f0a0019;
+        public static final int taking_risk=0x7f0a001a;
+        public static final int title_activity_minichat=0x7f0a001b;
+        public static final int write_or_answer=0x7f0a001c;
+        public static final int wrong_password=0x7f0a001d;
     }
     public static final class style {
         /** 
