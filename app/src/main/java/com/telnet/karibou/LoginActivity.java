@@ -50,6 +50,10 @@ public class LoginActivity extends ActionBarActivity {
                 new LoginTask(l, loginText, passwordText).execute();
             }
         });
+        this.prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        if (prefs.getString("login", null) != null) {
+            this.login.setText(prefs.getString("login", null));
+        }
 
         // Check connectivity
         ConnectivityManager cm =
@@ -60,7 +64,6 @@ public class LoginActivity extends ActionBarActivity {
 
         if (isConnected) {
             // Get login and password from prefs
-            prefs = PreferenceManager.getDefaultSharedPreferences(this);
             if (prefs.getString("login", null) != null && prefs.getString("password", null) != null) {
                 toggleView(true);
                 loginText = prefs.getString("login", null);
