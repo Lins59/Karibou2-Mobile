@@ -2,7 +2,7 @@ package com.telnet.adapters;
 
 import android.app.Activity;
 import android.graphics.Color;
-import android.text.Html;
+import android.text.Spannable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -10,6 +10,7 @@ import android.widget.ArrayAdapter;
 import android.widget.TextView;
 
 import com.telnet.karibou.R;
+import com.telnet.karibou.SmileyFactory;
 import com.telnet.objects.Message;
 
 import java.util.List;
@@ -40,11 +41,13 @@ public class MinichatAdapter extends ArrayAdapter<Message> {
         if (minutes.length() < 2) {
             minutes = "0" + minutes;
         }
-        messageView.setText(Html.fromHtml("<font color=\"#C3C3C3\">[" + hours + ":" +
+        String text = "<font color=\"#C3C3C3\">[" + hours + ":" +
                 minutes + "]</font> " +
                 "<font color=\"" + message.getColor() + "\" >" +
                 message.getPseudo() + "</font> : " +
-                message.getMessage() + "<br />"));
+                message.getMessage() + "<br />";
+        Spannable enrichedText = SmileyFactory.getSmiledText(rowView.getContext(), text);
+        messageView.setText(enrichedText);
 
         if (position % 2 == 1) {
             rowView.setBackgroundColor(view.getResources().getColor(R.color.k2_light_blue));
