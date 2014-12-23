@@ -17,7 +17,7 @@ import java.text.SimpleDateFormat;
 import java.util.List;
 
 public class FlashmailAdapter extends ArrayAdapter<Flashmail> {
-    private static SimpleDateFormat formater = new SimpleDateFormat("dd/MM/yy 'à' HH:mm");
+    private static SimpleDateFormat formater = new SimpleDateFormat("HH:mm 'le' dd/MM");
     private final Activity context;
     private final List<Flashmail> flashmails;
 
