@@ -9,6 +9,7 @@
     <string name="write_or_answer" translatable="false">Ecrire ou répondre à</string>
     <string name="cancel" translatable="false">Annuler</string>
     <string name="send" translatable="false">Envoyer</string>
+    <string name="ok" translatable="false">OK</string>
     <string name="choose_action" translatable="false">Choisir l\'action ...</string>
     <string name="action_answer" translatable="false">Répondre</string>
     <string name="action_mark_read" translatable="false">Marquer comme lu</string>

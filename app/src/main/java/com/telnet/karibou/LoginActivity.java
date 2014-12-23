@@ -135,7 +135,7 @@ public class LoginActivity extends ActionBarActivity {
             AlertDialog.Builder alertBuilder = new AlertDialog.Builder(this);
             alertBuilder.setMessage(R.string.wrong_password);
             alertBuilder.setCancelable(false);
-            alertBuilder.setPositiveButton("OK",
+            alertBuilder.setPositiveButton(R.string.ok,
                     new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int id) {
                             dialog.cancel();
