@@ -191,6 +191,8 @@ public class FlashmailFragment extends Fragment {
                     NotificationCompat.Builder builder = new NotificationCompat.Builder(getActivity());
                     builder.setPriority(Notification.FLAG_HIGH_PRIORITY);
                     builder.setAutoCancel(true);
+
+
                     //builder.setWhen(0);
                     builder.addAction(R.drawable.ic_launcher, getResources().getString(R.string.action_answer), pAnswerIntent);
                     builder.addAction(R.drawable.ic_action_refresh, getResources().getString(R.string.action_mark_read), pReadFlashmailIntent);
@@ -203,6 +205,13 @@ public class FlashmailFragment extends Fragment {
 
                     Notification notification = builder.build();
                     notification.vibrate = vibratePattern;
+
+                    // LED
+                    notification.flags |= Notification.FLAG_SHOW_LIGHTS;
+                    notification.ledARGB = 0xff00ff00;
+                    notification.ledOnMS = 300;
+                    notification.ledOffMS = 100;
+
                     notificationManager.notify(id, notification);
                 }
                 newNotifications.add(id);
