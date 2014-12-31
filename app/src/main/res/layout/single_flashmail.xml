@@ -58,7 +58,7 @@
             android:paddingRight="4dp"
             android:text="@string/answering_to"
             android:textAppearance="?android:attr/textAppearanceSmall"
-            android:visibility="visible" />
+            android:visibility="gone" />
 
         <TextView
             android:id="@+id/previousMsg"
@@ -71,7 +71,7 @@
             android:paddingRight="8dp"
             android:text="Ceci est un message de la plus haute importance en réponse à un flashmail de ouf"
             android:textAppearance="?android:attr/textAppearanceSmall"
-            android:visibility="visible" />
+            android:visibility="gone" />
     </TableRow>
 
     <TableRow
