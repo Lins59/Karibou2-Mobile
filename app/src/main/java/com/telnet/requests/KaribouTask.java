@@ -143,14 +143,16 @@ public abstract class KaribouTask<Params, Progress, Result> extends AsyncTask<Pa
         boolean first = true;
 
         for (NameValuePair pair : params) {
-            if (first)
-                first = false;
-            else
-                result.append("&");
+            if (pair != null && pair.getName() != null && pair.getValue() != null) {
+                if (first)
+                    first = false;
+                else
+                    result.append("&");
 
-            result.append(URLEncoder.encode(pair.getName(), "UTF-8"));
-            result.append("=");
-            result.append(URLEncoder.encode(pair.getValue(), "UTF-8"));
+                result.append(URLEncoder.encode(pair.getName(), "UTF-8"));
+                result.append("=");
+                result.append(URLEncoder.encode(pair.getValue(), "UTF-8"));
+            }
         }
 
         return result.toString();
