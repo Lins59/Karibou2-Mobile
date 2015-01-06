@@ -41,12 +41,66 @@ public class MinichatAdapter extends ArrayAdapter<Message> {
         if (minutes.length() < 2) {
             minutes = "0" + minutes;
         }
-        String text = "<font color=\"#C3C3C3\">[" + hours + ":" +
-                minutes + "]</font> " +
-                "<font color=\"" + message.getColor() + "\" >" +
-                message.getPseudo() + "</font> : " +
-                message.getMessage() + "<br />";
-        Spannable enrichedText = SmileyFactory.getSmiledText(rowView.getContext(), text);
+
+        StringBuilder sb = new StringBuilder();
+        sb.append("<font color=\"#C3C3C3\">[" + hours + ":" +
+                minutes + "]</font> ");
+        // Add /me emote
+        if (message.getMessage().startsWith("/me")) {
+            sb.insert(0, "<i>");
+            // <font>
+            sb.append("<font color=\"");
+            sb.append(message.getColor());
+            sb.append("\" >");
+            // Pseudo
+            sb.append(message.getPseudo());
+            // </font>
+            sb.append("</font>");
+            // Message
+            sb.append(message.getMessage().substring("/me".length()));
+            sb.append("<br />");
+            sb.append("</i >");
+        } else if (message.getMessage().startsWith("/life")) {
+            sb.insert(0, "<i>");
+            sb.append("La vie suivait son cours et ");
+            // <font>
+            sb.append("<font color=\"");
+            sb.append(message.getColor());
+            sb.append("\" >");
+            // Pseudo
+            sb.append(message.getPseudo());
+            // </font>
+            sb.append("</font>");
+            sb.append(" se demandait pourquoi 42.");
+            sb.append("</i>");
+        } else if (message.getMessage().startsWith("/joke")) {
+            sb.insert(0, "<i>");
+            sb.append("Tout allait bien et, soudain, ");
+            // <font>
+            sb.append("<font color=\"");
+            sb.append(message.getColor());
+            sb.append("\" >");
+            // Pseudo
+            sb.append(message.getPseudo());
+            // </font>
+            sb.append("</font>");
+            sb.append(" fit une blague.");
+            sb.append("</i>");
+        } else {
+            // <font>
+            sb.append("<font color=\"");
+            sb.append(message.getColor());
+            sb.append("\" >");
+            // Pseudo
+            sb.append(message.getPseudo());
+            // </font>
+            sb.append("</font> : ");
+            // Message
+            sb.append(message.getMessage());
+            sb.append("<br />");
+        }
+        Spannable enrichedText = SmileyFactory.getSmiledText(rowView.getContext(), sb.toString());
+
         messageView.setText(enrichedText);
 
         if (position % 2 == 1) {

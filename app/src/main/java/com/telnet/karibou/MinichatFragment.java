@@ -10,8 +10,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AbsListView;
-import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.ListView;
 
 import com.telnet.adapters.MinichatAdapter;
@@ -30,7 +30,7 @@ import java.util.ArrayList;
 
 public class MinichatFragment extends Fragment {
     private EditText msg;
-    private Button send;
+    private ImageButton send;
     private MinichatFragment mca = this;
     private MinichatAdapter adapter;
     private ListView messagesList;
@@ -44,7 +44,7 @@ public class MinichatFragment extends Fragment {
         View minichat = inflater.inflate(R.layout.activity_minichat, container, false);
 
         this.messagesList = (ListView) minichat.findViewById(R.id.messagesList);
-        this.send = (Button) minichat.findViewById(R.id.send);
+        this.send = (ImageButton) minichat.findViewById(R.id.send);
         this.msg = (EditText) minichat.findViewById(R.id.messageField);
 
         adapter = new MinichatAdapter(getActivity(), new ArrayList<Message>(60));
@@ -108,6 +108,7 @@ public class MinichatFragment extends Fragment {
     public void setMessages(String messages) {
         adapter.clear();
         appendMessages(messages);
+        scrollToBottom();
     }
     public void sendMessage(String message) {
         new PostMessage(mca).execute(Constants.MC_POST, message);

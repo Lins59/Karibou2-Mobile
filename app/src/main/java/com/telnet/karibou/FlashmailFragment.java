@@ -209,8 +209,8 @@ public class FlashmailFragment extends Fragment {
                 PendingIntent pReadFlashmailIntent = PendingIntent.getActivity(getActivity(), Integer.parseInt(flashmail.getId()), readFlashmailIntent, PendingIntent.FLAG_UPDATE_CURRENT);
 
                 // Add actions
-                builder.addAction(R.drawable.ic_launcher, getResources().getString(R.string.action_answer), pAnswerIntent);
-                builder.addAction(R.drawable.ic_action_refresh, getResources().getString(R.string.action_mark_read), pReadFlashmailIntent);
+                builder.addAction(R.drawable.ic_action_reply, getResources().getString(R.string.action_answer), pAnswerIntent);
+                builder.addAction(R.drawable.ic_action_read, getResources().getString(R.string.action_mark_read), pReadFlashmailIntent);
 
                 // Add image
                 Bitmap userImage = ImagesFactory.getPicture(flashmail.getSender().getId());
@@ -242,12 +242,6 @@ public class FlashmailFragment extends Fragment {
             notification.ledARGB = 0xff00ff00;
             notification.ledOnMS = 300;
             notification.ledOffMS = 100;
-
-            // Fix gray bug
-            /*int id = Resources.getSystem().getIdentifier("status_bar_latest_event_content", "id", "android");
-            notification.contentView.removeAllViews(id);
-            RemoteViews contentView = new RemoteViews(context.getPackageName(), R.layout.my_notification_id);
-            notification.contentView.addView(id, contentView);*/
 
             notificationManager.notify(Constants.NOTIFICATION_ID, notification);
         }
