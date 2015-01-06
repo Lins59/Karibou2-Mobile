@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <PreferenceCategory android:summary="@string/settings">
+        <ListPreference
+            android:defaultValue="60"
+            android:entries="@array/syncFrequency"
+            android:entryValues="@array/syncFrequencyValues"
+            android:key="settingSyncFrequency"
+            android:summary="%s"
+            android:title="@string/setting_sync_frequency" />
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="settingCustomVibratePattern"
+            android:summary="@string/setting_vibration_summary"
+            android:title="@string/setting_vibration" />
+    </PreferenceCategory>
+</PreferenceScreen>

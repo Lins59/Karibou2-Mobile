@@ -4,7 +4,6 @@
     <string name="login" translatable="false">Login</string>
     <string name="password" translatable="false">Mot de passe</string>
     <string name="connection" translatable="false">Connexion</string>
-    <string name="action_settings" translatable="false">Settings</string>
     <string name="title_activity_minichat" translatable="false">Karibou²</string>
     <string name="write_or_answer" translatable="false">Ecrire ou répondre à</string>
     <string name="cancel" translatable="false">Annuler</string>
@@ -20,4 +19,12 @@
     <string name="no_connection" translatable="false">Il semblerait que vous ne soyez pas connecté au WiFi. L\'application pourrait ne pas fonctionner et entraîner la fin de l\'humanité.</string>
     <string name="taking_risk" translatable="false">Je prends le risque</string>
     <string name="wrong_password" translatable="false">Vérifiez vos identifiants et votre connexion</string>
+
+    <!-- Settings -->
+    <string name="action_settings" translatable="false">Params.</string>
+    <string name="settings" translatable="false">Préférences générales</string>
+    <string name="setting_vibration" translatable="false">Motif de vibration</string>
+    <string name="setting_vibration_summary" translatable="false">Utiliser le motif de vibration "K2"</string>
+    <string name="setting_sync_frequency" translatable="false">Fréquence de synchronisation</string>
+    <string name="setting_sync_frequency_summary" translatable="false">Définir la fréquence de synchronisation</string>
 </resources>

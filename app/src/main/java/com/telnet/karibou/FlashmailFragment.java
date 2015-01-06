@@ -6,8 +6,10 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
+import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
@@ -156,6 +158,8 @@ public class FlashmailFragment extends Fragment {
     }
 
     public List<Integer> createNotifications(List<Flashmail> flashmails) {
+        SharedPreferences sharedPrefs = PreferenceManager
+                .getDefaultSharedPreferences(this.getActivity());
         List<Integer> newNotifications = new ArrayList<Integer>();
         if (flashmails != null) {
             NotificationManager notificationManager = (NotificationManager) getActivity().getSystemService(Context.NOTIFICATION_SERVICE);
@@ -168,7 +172,7 @@ public class FlashmailFragment extends Fragment {
             for (Flashmail flashmail : flashmails) {
                 Integer id = Integer.parseInt(flashmail.getId());
                 if (!notificationsDisplayed.contains(id)) {
-                    long[] vibratePattern = {0, dash, short_gap, dot, short_gap, dash, // K
+                    long[] customVibratePattern = {0, dash, short_gap, dot, short_gap, dash, // K
                             medium_gap,
                             dot, short_gap, dot, short_gap, dash, short_gap, dash, short_gap, dash // 2
                     };
@@ -201,10 +205,18 @@ public class FlashmailFragment extends Fragment {
                     builder.setStyle(new NotificationCompat.BigTextStyle().bigText(flashmail.getSender().getPseudo() + " " + getResources().getString(R.string.sent_you) + " : " + flashmail.getMessage()));
                     builder.setContentText(getResources().getString(R.string.you_have_received_a_flashmail));
                     builder.setSmallIcon(R.drawable.ic_launcher);
-                    builder.setVibrate(vibratePattern);
+                    if (sharedPrefs.getBoolean("settingCustomVibratePattern", false)) {
+                        builder.setVibrate(customVibratePattern);
+                    } else {
+                        builder.setVibrate(new long[]{0, 1000});
+                    }
 
                     Notification notification = builder.build();
-                    notification.vibrate = vibratePattern;
+                    if (sharedPrefs.getBoolean("settingCustomVibratePattern", false)) {
+                        notification.vibrate = customVibratePattern;
+                    } else {
+                        notification.vibrate = new long[]{0, 1000};
+                    }
 
                     // LED
                     notification.flags |= Notification.FLAG_SHOW_LIGHTS;

@@ -16,4 +16,6 @@ public class Constants {
     protected static final int PRESENCE_REFRESH = 240;
     protected static final int FLASHMAIL_PAUSE_REFRESH = 120;
     protected static final int FLASHMAIL_REFRESH = 60;
+
+    protected static final int RESULT_SETTINGS = 1;
 }

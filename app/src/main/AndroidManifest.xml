@@ -36,6 +36,10 @@
             android:name=".ReadFlashmailActivity"
             android:configChanges="orientation|screenSize"
             android:label="@string/app_name"></activity>
+        <activity
+            android:name=".UserSettingActivity"
+            android:configChanges="orientation|screenSize"
+            android:label="@string/app_name"></activity>
     </application>
 
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
