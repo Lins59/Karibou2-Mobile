@@ -25,7 +25,7 @@
     <string name="wrong_password" translatable="false">Vérifiez vos identifiants et votre connexion</string>
 
     <!-- Settings -->
-    <string name="action_settings" translatable="false">Params.</string>
+    <string name="action_settings" translatable="false">Paramètres</string>
     <string name="settings" translatable="false">Préférences générales</string>
     <string name="setting_vibration" translatable="false">Motif de vibration</string>
     <string name="setting_vibration_summary" translatable="false">Utiliser le motif de vibration "K2"</string>
