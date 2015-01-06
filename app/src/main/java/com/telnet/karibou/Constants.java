@@ -14,7 +14,6 @@ public class Constants {
     public static final String USER_LIST_URL = BASE_URL + "/onlineusers/listJSON/";
     protected static final int USER_LIST_REFRESH = 30;
     protected static final int PRESENCE_REFRESH = 240;
-    protected static final int FLASHMAIL_PAUSE_REFRESH = 120;
     protected static final int FLASHMAIL_REFRESH = 60;
 
     protected static final int RESULT_SETTINGS = 1;

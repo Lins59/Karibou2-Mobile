@@ -122,11 +122,14 @@ public class FlashmailFragment extends Fragment {
         super.onPause();
         Log.d("FlashmailFragment", "onPause called");
 
+        SharedPreferences prefs = PreferenceManager
+                .getDefaultSharedPreferences(this.getActivity());
+
         // Change timer interval to 120s
         timer.cancel();
         timer = new Timer();
         doAsynchronousTask = new FlashmailTimerTask();
-        timer.schedule(doAsynchronousTask, Constants.FLASHMAIL_PAUSE_REFRESH * 1000, Constants.FLASHMAIL_PAUSE_REFRESH * 1000);
+        timer.schedule(doAsynchronousTask, prefs.getInt("settingSyncFrequency", 60) * 1000, prefs.getInt("settingSyncFrequency", 60) * 1000);
     }
 
     public TimerTask getFlashmailTask() {
