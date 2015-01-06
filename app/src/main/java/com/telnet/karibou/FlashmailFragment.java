@@ -129,7 +129,7 @@ public class FlashmailFragment extends Fragment {
         timer.cancel();
         timer = new Timer();
         doAsynchronousTask = new FlashmailTimerTask();
-        timer.schedule(doAsynchronousTask, prefs.getInt("settingSyncFrequency", 60) * 1000, prefs.getInt("settingSyncFrequency", 60) * 1000);
+        timer.schedule(doAsynchronousTask, Integer.parseInt(prefs.getString("settingSyncFrequency", "60")) * 1000, Integer.parseInt(prefs.getString("settingSyncFrequency", "60")) * 1000);
     }
 
     public TimerTask getFlashmailTask() {
