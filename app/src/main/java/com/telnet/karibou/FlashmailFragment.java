@@ -7,11 +7,15 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.NotificationCompat;
+import android.text.Spannable;
+import android.text.SpannableString;
+import android.text.style.StyleSpan;
 import android.util.Log;
 import android.view.ContextMenu;
 import android.view.LayoutInflater;
@@ -30,7 +34,6 @@ import com.telnet.requests.FlashmailTask;
 import com.telnet.requests.ReadFlashmailTask;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -148,9 +151,7 @@ public class FlashmailFragment extends Fragment {
 
             // Add notification
             if (isAdded()) {
-                List<Integer> newNotifications = createNotifications(flashmails);
-                compareNotifications(this.notificationsDisplayed, newNotifications);
-                this.notificationsDisplayed = newNotifications;
+                createNotifications(flashmails);
             }
         } else {
             removeAllNotifications();
@@ -160,7 +161,7 @@ public class FlashmailFragment extends Fragment {
         adapter.notifyDataSetChanged();
     }
 
-    public List<Integer> createNotifications(List<Flashmail> flashmails) {
+    public void createNotifications(List<Flashmail> flashmails) {
         SharedPreferences sharedPrefs = PreferenceManager
                 .getDefaultSharedPreferences(this.getActivity());
         List<Integer> newNotifications = new ArrayList<Integer>();
@@ -172,82 +173,89 @@ public class FlashmailFragment extends Fragment {
             int medium_gap = 500;   // Length of Gap Between Letters
             int long_gap = 1000;    // Length of Gap Between Words
 
-            for (Flashmail flashmail : flashmails) {
-                Integer id = Integer.parseInt(flashmail.getId());
-                if (!notificationsDisplayed.contains(id)) {
-                    long[] customVibratePattern = {0, dash, short_gap, dot, short_gap, dash, // K
-                            medium_gap,
-                            dot, short_gap, dot, short_gap, dash, short_gap, dash, short_gap, dash // 2
-                    };
-                    Intent intent = new Intent(this.getActivity(), MainActivity.class);
-                    PendingIntent pendingIntent = PendingIntent.getActivity(getActivity(), 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+            long[] customVibratePattern = {0, dash, short_gap, dot, short_gap, dash, // K
+                    medium_gap,
+                    dot, short_gap, dot, short_gap, dash, short_gap, dash, short_gap, dash // 2
+            };
 
-                    // Answer intent
-                    Intent answerIntent = new Intent(this.getActivity(), SendFlashmailActivity.class);
-                    answerIntent.putExtra("id", flashmail.getId());
-                    answerIntent.putExtra("pseudo", flashmail.getSender().getPseudo());
-                    answerIntent.putExtra("userId", flashmail.getSender().getId().toString());
-                    answerIntent.putExtra("answer", true);
-                    PendingIntent pAnswerIntent = PendingIntent.getActivity(getActivity(), Integer.parseInt(flashmail.getId()), answerIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+            NotificationCompat.Builder builder = new NotificationCompat.Builder(getActivity());
+            builder.setContentTitle(getResources().getQuantityString(R.plurals.you_have_received_a_flashmail, flashmails.size(), flashmails.size()));
+            builder.setContentText(getResources().getQuantityString(R.plurals.you_have_received_a_flashmail, flashmails.size(), flashmails.size()));
+            builder.setSmallIcon(R.drawable.ic_launcher);
+            builder.setPriority(Notification.FLAG_HIGH_PRIORITY);
+            builder.setAutoCancel(true);
+            builder.setNumber(flashmails.size());
 
-                    // Mark as read
-                    Intent readFlashmailIntent = new Intent(this.getActivity(), ReadFlashmailActivity.class);
-                    readFlashmailIntent.putExtra("id", flashmail.getId());
-                    PendingIntent pReadFlashmailIntent = PendingIntent.getActivity(getActivity(), Integer.parseInt(flashmail.getId()), readFlashmailIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+            // Add intent
+            Intent intent = new Intent(this.getActivity(), MainActivity.class);
+            PendingIntent pendingIntent = PendingIntent.getActivity(getActivity(), 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+            builder.setContentIntent(pendingIntent);
 
-                    NotificationCompat.Builder builder = new NotificationCompat.Builder(getActivity());
-                    builder.setPriority(Notification.FLAG_HIGH_PRIORITY);
-                    builder.setAutoCancel(true);
+            // Add action for one flashmail
+            if (flashmails.size() == 1) {
+                Flashmail flashmail = flashmails.get(0);
 
+                // Answer intent
+                Intent answerIntent = new Intent(this.getActivity(), SendFlashmailActivity.class);
+                answerIntent.putExtra("id", flashmail.getId());
+                answerIntent.putExtra("pseudo", flashmail.getSender().getPseudo());
+                answerIntent.putExtra("userId", flashmail.getSender().getId().toString());
+                answerIntent.putExtra("answer", true);
+                PendingIntent pAnswerIntent = PendingIntent.getActivity(getActivity(), Integer.parseInt(flashmail.getId()), answerIntent, PendingIntent.FLAG_UPDATE_CURRENT);
 
-                    //builder.setWhen(0);
-                    builder.addAction(R.drawable.ic_launcher, getResources().getString(R.string.action_answer), pAnswerIntent);
-                    builder.addAction(R.drawable.ic_action_refresh, getResources().getString(R.string.action_mark_read), pReadFlashmailIntent);
-                    builder.setContentIntent(pendingIntent);
-                    builder.setContentTitle(getResources().getString(R.string.you_have_received_a_flashmail));
-                    builder.setStyle(new NotificationCompat.BigTextStyle().bigText(flashmail.getSender().getPseudo() + " " + getResources().getString(R.string.sent_you) + " : " + flashmail.getMessage()));
-                    builder.setContentText(getResources().getString(R.string.you_have_received_a_flashmail));
-                    builder.setSmallIcon(R.drawable.ic_launcher);
-                    if (sharedPrefs.getBoolean("settingCustomVibratePattern", false)) {
-                        builder.setVibrate(customVibratePattern);
-                    } else {
-                        builder.setVibrate(new long[]{0, 1000});
-                    }
+                // Mark as read
+                Intent readFlashmailIntent = new Intent(this.getActivity(), ReadFlashmailActivity.class);
+                readFlashmailIntent.putExtra("id", flashmail.getId());
+                PendingIntent pReadFlashmailIntent = PendingIntent.getActivity(getActivity(), Integer.parseInt(flashmail.getId()), readFlashmailIntent, PendingIntent.FLAG_UPDATE_CURRENT);
 
-                    Notification notification = builder.build();
-                    if (sharedPrefs.getBoolean("settingCustomVibratePattern", false)) {
-                        notification.vibrate = customVibratePattern;
-                    } else {
-                        notification.vibrate = new long[]{0, 1000};
-                    }
+                // Add actions
+                builder.addAction(R.drawable.ic_launcher, getResources().getString(R.string.action_answer), pAnswerIntent);
+                builder.addAction(R.drawable.ic_action_refresh, getResources().getString(R.string.action_mark_read), pReadFlashmailIntent);
 
-                    // LED
-                    notification.flags |= Notification.FLAG_SHOW_LIGHTS;
-                    notification.ledARGB = 0xff00ff00;
-                    notification.ledOnMS = 300;
-                    notification.ledOffMS = 100;
-
-                    notificationManager.notify(id, notification);
-                }
-                newNotifications.add(id);
+                // Add image
+                Bitmap userImage = ImagesFactory.getPicture(flashmail.getSender().getId());
+                builder.setLargeIcon(userImage);
             }
-        }
-        return newNotifications;
-    }
 
-    public void compareNotifications(Collection<Integer> oldNotifications, Collection<Integer> newNotifications) {
-        oldNotifications.removeAll(newNotifications);
-        NotificationManager notificationManager = (NotificationManager) getActivity().getSystemService(Context.NOTIFICATION_SERVICE);
-        for (Integer id : oldNotifications) {
-            notificationManager.cancel(id);
+            // Style
+            NotificationCompat.InboxStyle inboxStyle = new NotificationCompat.InboxStyle(builder);
+            inboxStyle.setBigContentTitle(getResources().getQuantityString(R.plurals.you_have_received_a_flashmail, flashmails.size(), flashmails.size()));
+            inboxStyle.setSummaryText(getResources().getQuantityString(R.plurals.you_have_received_a_flashmail, flashmails.size(), flashmails.size()));
+            for (Flashmail flashmail : flashmails) {
+                Spannable sb = new SpannableString(flashmail.getSender().getPseudo() + " " + getResources().getString(R.string.sent_you) + " : " + flashmail.getMessage());
+                sb.setSpan(new StyleSpan(android.graphics.Typeface.BOLD), 0, flashmail.getSender().getPseudo().length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+                inboxStyle.addLine(flashmail.getSender().getPseudo() + " " + getResources().getString(R.string.sent_you) + " : " + flashmail.getMessage());
+            }
+            builder.setStyle(inboxStyle);
+
+            // Create notification
+            Notification notification = inboxStyle.build();
+
+            if (sharedPrefs.getBoolean("settingCustomVibratePattern", false)) {
+                notification.vibrate = customVibratePattern;
+            } else {
+                notification.vibrate = new long[]{0, 1000};
+            }
+
+            // LED
+            notification.flags |= Notification.FLAG_SHOW_LIGHTS;
+            notification.ledARGB = 0xff00ff00;
+            notification.ledOnMS = 300;
+            notification.ledOffMS = 100;
+
+            // Fix gray bug
+            /*int id = Resources.getSystem().getIdentifier("status_bar_latest_event_content", "id", "android");
+            notification.contentView.removeAllViews(id);
+            RemoteViews contentView = new RemoteViews(context.getPackageName(), R.layout.my_notification_id);
+            notification.contentView.addView(id, contentView);*/
+
+            notificationManager.notify(Constants.NOTIFICATION_ID, notification);
         }
     }
 
     public void removeAllNotifications() {
         NotificationManager notificationManager = (NotificationManager) getActivity().getSystemService(Context.NOTIFICATION_SERVICE);
-        for (Integer id : notificationsDisplayed) {
-            notificationManager.cancel(id);
-        }
+        notificationManager.cancel(Constants.NOTIFICATION_ID);
     }
 
     /*

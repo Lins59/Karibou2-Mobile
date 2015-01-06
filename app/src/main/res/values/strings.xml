@@ -13,7 +13,11 @@
     <string name="action_answer" translatable="false">Répondre</string>
     <string name="action_mark_read" translatable="false">Marquer comme lu</string>
     <string name="no_new_flashmails" translatable="false">Vous n\'avez pas de nouveaux flashmails</string>
-    <string name="you_have_received_a_flashmail" translatable="false">"Vous avez reçu un flashmail !"</string>
+
+    <plurals name="you_have_received_a_flashmail" translatable="false">
+        <item quantity="one">Vous avez reçu un flashmail !</item>
+        <item quantity="other">Vous avez reçu %1$d flashmails</item>
+    </plurals>
     <string name="sent_you" translatable="false">"vous a envoyé"</string>
     <string name="answering_to" translatable="false">En réponse à :</string>
     <string name="no_connection" translatable="false">Il semblerait que vous ne soyez pas connecté au WiFi. L\'application pourrait ne pas fonctionner et entraîner la fin de l\'humanité.</string>

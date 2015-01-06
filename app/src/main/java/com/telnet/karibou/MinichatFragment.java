@@ -17,6 +17,7 @@ import android.widget.ListView;
 import com.telnet.adapters.MinichatAdapter;
 import com.telnet.objects.Message;
 import com.telnet.parsers.MinichatParser;
+import com.telnet.requests.MinichatTask;
 import com.telnet.requests.PostMessage;
 import com.telnet.requests.PushTask;
 
@@ -25,7 +26,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONTokener;
 
-import java.io.IOException;
 import java.util.ArrayList;
 
 public class MinichatFragment extends Fragment {
@@ -89,14 +89,8 @@ public class MinichatFragment extends Fragment {
         super.onResume();
         Log.d("MinichatFragment", "onResume called");
 
-        // Fetch results
-        try {
-            String result = PushTask.doGet(Constants.MC_URL);
-            adapter.clear();
-            appendMessages(result);
-        } catch (IOException e) {
-            Log.e("MinichatFragment", e.getMessage());
-        }
+        MinichatTask minichatTask = new MinichatTask(this);
+        minichatTask.execute(Constants.MC_URL);
 
         pushTask = new PushTask(this);
         pushTask.execute(Constants.KARIBOU_PUSH);
@@ -111,6 +105,10 @@ public class MinichatFragment extends Fragment {
         pushTask.cancel(true);
     }
 
+    public void setMessages(String messages) {
+        adapter.clear();
+        appendMessages(messages);
+    }
     public void sendMessage(String message) {
         new PostMessage(mca).execute(Constants.MC_POST, message);
     }

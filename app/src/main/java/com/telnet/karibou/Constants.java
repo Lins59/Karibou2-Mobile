@@ -15,6 +15,7 @@ public class Constants {
     protected static final int USER_LIST_REFRESH = 30;
     protected static final int PRESENCE_REFRESH = 240;
     protected static final int FLASHMAIL_REFRESH = 60;
+    protected static final int NOTIFICATION_ID = 1;
 
     protected static final int RESULT_SETTINGS = 1;
 }

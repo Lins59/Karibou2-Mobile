@@ -53,7 +53,7 @@ public class UserListAdapter extends ArrayAdapter<User> {
                 user.getPseudo() + "</font> " + "<i>" + away + message + "</i>" + "<br />";
 
         txtTitle.setText(Html.fromHtml(htmlUser));
-        ImagesFactory.colorizePicture(imageView, user.getPicturePath());
+        ImagesFactory.colorizePicture(imageView, user.getId(), user.getPicturePath());
         return rowView;
     }
 }
