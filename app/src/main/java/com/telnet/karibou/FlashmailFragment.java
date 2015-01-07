@@ -191,6 +191,8 @@ public class FlashmailFragment extends Fragment {
             PendingIntent pendingIntent = PendingIntent.getActivity(getActivity(), 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
             builder.setContentIntent(pendingIntent);
 
+            // User id for image
+            int userId = 0;
             // Add action for one flashmail
             if (flashmails.size() == 1) {
                 Flashmail flashmail = flashmails.get(0);
@@ -209,12 +211,10 @@ public class FlashmailFragment extends Fragment {
                 PendingIntent pReadFlashmailIntent = PendingIntent.getActivity(getActivity(), Integer.parseInt(flashmail.getId()), readFlashmailIntent, PendingIntent.FLAG_UPDATE_CURRENT);
 
                 // Add actions
-                builder.addAction(R.drawable.ic_action_reply, getResources().getString(R.string.action_answer), pAnswerIntent);
                 builder.addAction(R.drawable.ic_action_read, getResources().getString(R.string.action_mark_read), pReadFlashmailIntent);
+                builder.addAction(R.drawable.ic_action_reply, getResources().getString(R.string.action_answer), pAnswerIntent);
 
-                // Add image
-                Bitmap userImage = ImagesFactory.getPicture(flashmail.getSender().getId());
-                builder.setLargeIcon(userImage);
+                userId = flashmail.getSender().getId();
             }
 
             // Style
@@ -222,11 +222,18 @@ public class FlashmailFragment extends Fragment {
             inboxStyle.setBigContentTitle(getResources().getQuantityString(R.plurals.you_have_received_a_flashmail, flashmails.size(), flashmails.size()));
             inboxStyle.setSummaryText(getResources().getQuantityString(R.plurals.you_have_received_a_flashmail, flashmails.size(), flashmails.size()));
             for (Flashmail flashmail : flashmails) {
+                userId = flashmail.getSender().getId();
                 Spannable sb = new SpannableString(flashmail.getSender().getPseudo() + " " + getResources().getString(R.string.sent_you) + " : " + flashmail.getMessage());
                 sb.setSpan(new StyleSpan(android.graphics.Typeface.BOLD), 0, flashmail.getSender().getPseudo().length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
                 inboxStyle.addLine(flashmail.getSender().getPseudo() + " " + getResources().getString(R.string.sent_you) + " : " + flashmail.getMessage());
             }
-            builder.setStyle(inboxStyle);
+
+            if (userId != 0) {
+                // Add image
+                Bitmap userImage = ImagesFactory.getPicture(userId);
+                builder.setLargeIcon(userImage);
+                builder.setStyle(inboxStyle);
+            }
 
             // Create notification
             Notification notification = inboxStyle.build();
