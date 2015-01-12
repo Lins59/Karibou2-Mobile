@@ -23,7 +23,7 @@ import java.util.List;
 
 public abstract class KaribouTask<Params, Progress, Result> extends AsyncTask<Params, Progress, Result> {
     private static final String COOKIES_HEADER = "Set-Cookie";
-    private static String pantieId;
+    public static String pantieId;
     private static String login;
     private static String password;
     private static CookieManager cookieManager = new CookieManager(null, CookiePolicy.ACCEPT_ALL);

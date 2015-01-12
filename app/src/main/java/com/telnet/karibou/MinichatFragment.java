@@ -13,13 +13,21 @@ import android.widget.AbsListView;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ListView;
+import android.widget.Toast;
 
+import com.android.volley.AuthFailureError;
+import com.android.volley.DefaultRetryPolicy;
+import com.android.volley.NetworkError;
+import com.android.volley.NoConnectionError;
+import com.android.volley.ParseError;
+import com.android.volley.Request;
+import com.android.volley.Response;
+import com.android.volley.ServerError;
+import com.android.volley.TimeoutError;
+import com.android.volley.VolleyError;
 import com.telnet.adapters.MinichatAdapter;
 import com.telnet.objects.Message;
 import com.telnet.parsers.MinichatParser;
-import com.telnet.requests.MinichatTask;
-import com.telnet.requests.PostMessage;
-import com.telnet.requests.PushTask;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -27,20 +35,27 @@ import org.json.JSONObject;
 import org.json.JSONTokener;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 public class MinichatFragment extends Fragment {
+    private HttpToolbox httpToolbox;
     private EditText msg;
     private ImageButton send;
-    private MinichatFragment mca = this;
     private MinichatAdapter adapter;
     private ListView messagesList;
     private boolean atBottom = true;
-    private PushTask pushTask;
+    private boolean stopPush = false;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        // Create http toolbox
+        httpToolbox = HttpToolbox.getInstance(getActivity().getApplicationContext());
+
+        // View
         View minichat = inflater.inflate(R.layout.activity_minichat, container, false);
 
         this.messagesList = (ListView) minichat.findViewById(R.id.messagesList);
@@ -89,11 +104,25 @@ public class MinichatFragment extends Fragment {
         super.onResume();
         Log.d("MinichatFragment", "onResume called");
 
-        MinichatTask minichatTask = new MinichatTask(this);
-        minichatTask.execute(Constants.MC_URL);
+        // Get messages list immediately
+        PrioritizedStringRequest minichatRequest = new PrioritizedStringRequest(Request.Method.GET, Constants.MC_URL, new Response.Listener<String>() {
+            @Override
+            public void onResponse(String messages) {
+                setMessages(messages);
+                Log.i("MinichatFragment", "End of polling minichat");
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError volleyError) {
+                Log.e("MinichatFragment", "Error in polling");
+            }
+        });
+        minichatRequest.setPriority(Request.Priority.IMMEDIATE);
+        httpToolbox.addToRequestQueue(minichatRequest, "MC");
 
-        pushTask = new PushTask(this);
-        pushTask.execute(Constants.KARIBOU_PUSH);
+        // Engage push task
+        this.stopPush = false;
+        engagePushTask();
     }
 
     @Override
@@ -101,8 +130,8 @@ public class MinichatFragment extends Fragment {
         super.onPause();
         Log.d("MinichatFragment", "onPause called");
 
-        // Cancel timer
-        pushTask.cancel(true);
+        // Cancel push task
+        this.stopPush = true;
     }
 
     public void setMessages(String messages) {
@@ -110,8 +139,43 @@ public class MinichatFragment extends Fragment {
         appendMessages(messages);
         scrollToBottom();
     }
-    public void sendMessage(String message) {
-        new PostMessage(mca).execute(Constants.MC_POST, message);
+
+    public void sendMessage(final String message) {
+        Log.d("PostTask", message);
+
+        PrioritizedStringRequest sendMessageRequest = new PrioritizedStringRequest(Request.Method.POST, Constants.MC_POST, new Response.Listener<String>() {
+            @Override
+            public void onResponse(String response) {
+                Log.d("SendMessageRequest", "Message posted");
+                clearForm();
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError volleyError) {
+                if (volleyError instanceof TimeoutError || volleyError instanceof NoConnectionError) {
+                    Toast.makeText(getActivity().getApplicationContext(), "Timeout",
+                            Toast.LENGTH_LONG).show();
+                } else if (volleyError instanceof AuthFailureError) {
+                    //TODO
+                } else if (volleyError instanceof ServerError) {
+                    //TODO
+                } else if (volleyError instanceof NetworkError) {
+                    //TODO
+                } else if (volleyError instanceof ParseError) {
+                    //TODO
+                }
+                Log.e("SendMessageRequest", "Error when sending message.");
+            }
+        }) {
+            @Override
+            protected Map<String, String> getParams() {
+                Map<String, String> params = new HashMap<String, String>();
+                params.put("msg", message);
+                return params;
+            }
+        };
+        sendMessageRequest.setPriority(Request.Priority.IMMEDIATE);
+        httpToolbox.addToRequestQueue(sendMessageRequest, "PUSH");
     }
 
     // First insert (GET from /mc2/state/nb,msg)
@@ -129,8 +193,8 @@ public class MinichatFragment extends Fragment {
             Log.e("MinichatActivity", e.getMessage());
 
             // Relaunch LoginActivity
-            Intent intent = new Intent(getActivity().getBaseContext(), LoginActivity.class);
-            getActivity().startActivity(intent);
+            //Intent intent = new Intent(getActivity().getBaseContext(), LoginActivity.class);
+            //getActivity().startActivity(intent);
         }
     }
 
@@ -149,7 +213,7 @@ public class MinichatFragment extends Fragment {
             } else {
                 // Must be timeout
             }
-        } catch (JSONException e) {
+        } catch (Exception e) {
             // If a JSONException is raised, it must have been a logout from TELnet
             Log.e("MinichatActivity", e.getMessage());
 
@@ -169,8 +233,47 @@ public class MinichatFragment extends Fragment {
         scrollToBottom();
     }
 
-    public void setPushTask(PushTask pushTask) {
-        this.pushTask = pushTask;
+    public void engagePushTask() {
+        if (!stopPush) {
+            PrioritizedStringRequest pushRequest = new PrioritizedStringRequest(Request.Method.POST, Constants.KARIBOU_PUSH, new Response.Listener<String>() {
+                @Override
+                public void onResponse(String response) {
+                    Log.d("PushRequest", response);
+                    appendMessagesFromPantie(response);
+
+                    // Reengage push task
+                    engagePushTask();
+                }
+            }, new Response.ErrorListener() {
+                @Override
+                public void onErrorResponse(VolleyError volleyError) {
+                    if (volleyError instanceof TimeoutError || volleyError instanceof NoConnectionError) {
+                        Toast.makeText(getActivity().getApplicationContext(), "Timeout",
+                                Toast.LENGTH_LONG).show();
+                    } else if (volleyError instanceof AuthFailureError) {
+                        //TODO
+                    } else if (volleyError instanceof ServerError) {
+                        //TODO
+                    } else if (volleyError instanceof NetworkError) {
+                        //TODO
+                    } else if (volleyError instanceof ParseError) {
+                        //TODO
+                    }
+                    Log.e("PushRequest", "Error during pushing.");
+                    engagePushTask();
+                }
+            }) {
+                @Override
+                protected Map<String, String> getParams() {
+                    Map<String, String> params = new HashMap<String, String>();
+                    params.put("session", HttpToolbox.getPantieId());
+                    return params;
+                }
+            };
+            pushRequest.setPriority(Request.Priority.IMMEDIATE);
+            pushRequest.setRetryPolicy(new DefaultRetryPolicy(30000, 0, 0));
+            httpToolbox.addToRequestQueue(pushRequest, "PUSH");
+        }
     }
 
     public void scrollToBottom() {

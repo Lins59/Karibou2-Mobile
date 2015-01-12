@@ -9,7 +9,9 @@ import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.telnet.karibou.ImagesFactory;
+import com.android.volley.toolbox.ImageLoader;
+import com.telnet.karibou.HttpToolbox;
+import com.telnet.karibou.ImageFactory;
 import com.telnet.karibou.R;
 import com.telnet.objects.User;
 
@@ -18,12 +20,14 @@ import java.util.List;
 public class UserListAdapter extends ArrayAdapter<User> {
     private final Activity context;
     private final List<User> users;
+    private ImageLoader imageLoader;
 
     public UserListAdapter(Activity context,
                            List<User> users) {
         super(context, R.layout.single_user, users);
         this.context = context;
         this.users = users;
+        this.imageLoader = HttpToolbox.getInstance(this.getContext()).getImageLoader();
     }
 
     public List<User> getUsers() {
@@ -53,7 +57,8 @@ public class UserListAdapter extends ArrayAdapter<User> {
                 user.getPseudo() + "</font> " + "<i>" + away + message + "</i>" + "<br />";
 
         txtTitle.setText(Html.fromHtml(htmlUser));
-        ImagesFactory.colorizePicture(imageView, user.getId(), user.getPicturePath());
+
+        ImageFactory.colorizePicture(imageView, user.getId(), user.getPicturePath());
         return rowView;
     }
 }

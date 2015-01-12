@@ -27,11 +27,12 @@ import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import com.android.volley.Request;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
 import com.telnet.adapters.FlashmailAdapter;
 import com.telnet.objects.Flashmail;
 import com.telnet.parsers.FlashmailParser;
-import com.telnet.requests.FlashmailTask;
-import com.telnet.requests.ReadFlashmailTask;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -42,6 +43,7 @@ public class FlashmailFragment extends Fragment {
     private static final int ANSWER_CODE = 1;
     private static final int ANSWER_ID = Menu.FIRST + 3;
     private static final int MARK_READ_ID = Menu.FIRST + 4;
+    private HttpToolbox httpToolbox;
     private FlashmailFragment fma = this;
     private FlashmailAdapter adapter;
     private ListView flashmailList;
@@ -53,6 +55,10 @@ public class FlashmailFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        // Create http toolbox
+        httpToolbox = HttpToolbox.getInstance(getActivity().getApplicationContext());
 
         View flashmail = inflater.inflate(R.layout.activity_flashmail, container, false);
 
@@ -111,13 +117,28 @@ public class FlashmailFragment extends Fragment {
         super.onResume();
         Log.d("FlashmailFragment", "onResume called");
 
-        // Execute task to refresh and change timer interval back to 10s
-        if (timer != null) {
-            timer.cancel();
+        /*if (timer != null) {
+        /    timer.cancel();
         }
         timer = new Timer();
         doAsynchronousTask = new FlashmailTimerTask();
-        timer.schedule(doAsynchronousTask, 0, Constants.FLASHMAIL_REFRESH * 1000);
+        timer.schedule(doAsynchronousTask, 0, Constants.FLASHMAIL_REFRESH * 1000);*/
+
+        // Get flashmail list ASAP
+        PrioritizedStringRequest flashmailsRequest = new PrioritizedStringRequest(Request.Method.GET, Constants.FLASHMAIL_URL, new Response.Listener<String>() {
+            @Override
+            public void onResponse(String flashmails) {
+                setFlashmails(flashmails);
+                Log.i("FlashmailFragment", "End of polling flashmails");
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError volleyError) {
+                Log.e("FlashmailFragment", "Error in polling");
+            }
+        });
+        flashmailsRequest.setPriority(Request.Priority.IMMEDIATE);
+        httpToolbox.addToRequestQueue(flashmailsRequest, "FM");
     }
 
     @Override
@@ -129,10 +150,10 @@ public class FlashmailFragment extends Fragment {
                 .getDefaultSharedPreferences(this.getActivity());
 
         // Change timer interval to 120s
-        timer.cancel();
+        /*timer.cancel();
         timer = new Timer();
         doAsynchronousTask = new FlashmailTimerTask();
-        timer.schedule(doAsynchronousTask, Integer.parseInt(prefs.getString("settingSyncFrequency", "60")) * 1000, Integer.parseInt(prefs.getString("settingSyncFrequency", "60")) * 1000);
+        timer.schedule(doAsynchronousTask, Integer.parseInt(prefs.getString("settingSyncFrequency", "60")) * 1000, Integer.parseInt(prefs.getString("settingSyncFrequency", "60")) * 1000);*/
     }
 
     public TimerTask getFlashmailTask() {
@@ -193,6 +214,7 @@ public class FlashmailFragment extends Fragment {
 
             // User id for image
             int userId = 0;
+
             // Add action for one flashmail
             if (flashmails.size() == 1) {
                 Flashmail flashmail = flashmails.get(0);
@@ -230,7 +252,7 @@ public class FlashmailFragment extends Fragment {
 
             if (userId != 0) {
                 // Add image
-                Bitmap userImage = ImagesFactory.getPicture(userId);
+                Bitmap userImage = ImageFactory.getPicture(userId);
                 builder.setLargeIcon(userImage);
                 builder.setStyle(inboxStyle);
             }
@@ -272,8 +294,8 @@ public class FlashmailFragment extends Fragment {
     }
 
     public void markFlashmailRead(Flashmail flashmail) {
-        ReadFlashmailTask readFlashmailTask = new ReadFlashmailTask(fma);
-        readFlashmailTask.execute(Constants.FLASHMAIL_READ_URL, flashmail.getId());
+        // ReadFlashmailTask readFlashmailTask = new ReadFlashmailTask(fma);
+        // readFlashmailTask.execute(Constants.FLASHMAIL_READ_URL, flashmail.getId());
     }
 
     @Override
@@ -294,8 +316,8 @@ public class FlashmailFragment extends Fragment {
             handler.post(new Runnable() {
                 public void run() {
                     try {
-                        FlashmailTask flashmailTask = new FlashmailTask(fma);
-                        flashmailTask.execute(Constants.FLASHMAIL_URL);
+                        // //FlashmailTask flashmailTask = new FlashmailTask(fma);
+                        //  flashmailTask.execute(Constants.FLASHMAIL_URL);
                     } catch (Exception e) {
                     }
                 }

@@ -2,7 +2,7 @@ package com.telnet.parsers;
 
 import android.util.Log;
 
-import com.telnet.karibou.ColorsFactory;
+import com.telnet.karibou.ColorFactory;
 import com.telnet.karibou.Constants;
 import com.telnet.objects.User;
 
@@ -35,7 +35,7 @@ public class UserListParser {
                 }
 
                 // Get color
-                String color = ColorsFactory.getColor(userId);
+                String color = ColorFactory.getColor(userId);
 
                 users.add(new User(userId, pseudo, color, message, (obj.getInt("away") == 1), Constants.BASE_URL + obj.getString("picture_path")));
             }

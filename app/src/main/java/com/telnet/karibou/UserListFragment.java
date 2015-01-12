@@ -12,6 +12,9 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ListView;
 
+import com.android.volley.Request;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
 import com.telnet.adapters.UserListAdapter;
 import com.telnet.objects.User;
 import com.telnet.parsers.UserListParser;
@@ -52,10 +55,6 @@ public class UserListFragment extends Fragment {
 
         // Timer for refresh will be set in onResume
         handler = new Handler();
-
-        // show The Image
-        //new DownloadImageTask((ImageView) userlistview.findViewById(R.id.imageView))
-        //        .execute("http://java.sogeti.nl/JavaBlog/wp-content/uploads/2009/04/android_icon_256.png");
         return userlistview;
     }
 
@@ -69,8 +68,21 @@ public class UserListFragment extends Fragment {
             timer.cancel();
         }
         timer = new Timer();
-        doAsynchronousTask = new UserListTimerTask();
-        timer.schedule(doAsynchronousTask, 0, Constants.USER_LIST_REFRESH * 1000);
+        PrioritizedStringRequest userListRequest = new PrioritizedStringRequest(Request.Method.GET, Constants.USER_LIST_URL, new Response.Listener<String>() {
+            @Override
+            public void onResponse(String users) {
+                setUsers(users);
+                Log.i("UserListFragment", "End of polling users");
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError volleyError) {
+                Log.e("UserListFragment", "Error in polling");
+            }
+        });
+        userListRequest.setPriority(Request.Priority.NORMAL);
+        HttpToolbox.getInstance(getActivity().getApplicationContext()).addToRequestQueue(userListRequest, "USER_LIST");
+        //timer.schedule(doAsynchronousTask, 0, Constants.USER_LIST_REFRESH * 1000);
     }
 
     @Override
@@ -93,21 +105,6 @@ public class UserListFragment extends Fragment {
 
         // Refresh adapter
         adapter.notifyDataSetChanged();
-    }
-
-    private class UserListTimerTask extends TimerTask {
-        @Override
-        public void run() {
-            handler.post(new Runnable() {
-                public void run() {
-                    try {
-                        com.telnet.requests.UserListTask userListTask = new com.telnet.requests.UserListTask(ula);
-                        userListTask.execute(Constants.USER_LIST_URL);
-                    } catch (Exception e) {
-                    }
-                }
-            });
-        }
     }
 }
 

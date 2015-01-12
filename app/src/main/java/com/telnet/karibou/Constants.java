@@ -11,6 +11,7 @@ public class Constants {
     public static final String MC_POST = BASE_URL + "/mc2/post/";
     public static final String FLASHMAIL_URL = BASE_URL + "/flashmail/unreadlistJSON/";
     public static final String FLASHMAIL_READ_URL = BASE_URL + "/flashmail/setasread/";
+    public static final String FLASHMAIL_SEND = BASE_URL + "/flashmail/send/";
     public static final String USER_LIST_URL = BASE_URL + "/onlineusers/listJSON/";
     protected static final int USER_LIST_REFRESH = 30;
     protected static final int PRESENCE_REFRESH = 240;

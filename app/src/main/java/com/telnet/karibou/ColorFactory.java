@@ -2,7 +2,7 @@ package com.telnet.karibou;
 
 import android.util.SparseArray;
 
-public class ColorsFactory {
+public class ColorFactory {
     private static SparseArray<String> usersColors = new SparseArray<String>();
 
     public static String getColor(Integer userId) {

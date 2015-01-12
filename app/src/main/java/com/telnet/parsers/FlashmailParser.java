@@ -2,7 +2,7 @@ package com.telnet.parsers;
 
 import android.util.Log;
 
-import com.telnet.karibou.ColorsFactory;
+import com.telnet.karibou.ColorFactory;
 import com.telnet.objects.Flashmail;
 import com.telnet.objects.User;
 
@@ -44,7 +44,7 @@ public class FlashmailParser {
                 }
 
                 // Get color
-                String color = ColorsFactory.getColor(userId);
+                String color = ColorFactory.getColor(userId);
 
                 // Get old message if exists
                 Object oldMessage = obj.get("oldMessage");

@@ -1,6 +1,6 @@
 package com.telnet.parsers;
 
-import com.telnet.karibou.ColorsFactory;
+import com.telnet.karibou.ColorFactory;
 import com.telnet.objects.Message;
 
 import org.json.JSONArray;
@@ -39,7 +39,7 @@ public class MinichatParser {
             }
 
             // Get color
-            String color = ColorsFactory.getColor(userId);
+            String color = ColorFactory.getColor(userId);
 
             // Mix up
             results.add(new Message(pseudo, message, date, color));
