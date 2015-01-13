@@ -15,7 +15,7 @@ public class Constants {
     public static final String USER_LIST_URL = BASE_URL + "/onlineusers/listJSON/";
     public static final String ACCOUNT_TYPE = "com.telnet.karibou.account";
     public static final String AUTHTOKEN_TYPE_FULL_ACCESS = "Full access";
-    public static final String AUTHTOKEN_TYPE_FULL_ACCESS_LABEL = "Full access";
+    public static final String AUTHTOKEN_TYPE_FULL_ACCESS_LABEL = "Accès complet";
     public static final String AUTHTOKEN_VALIDITY = "AUTHTOKEN_VALIDITY";
     public static final Long AUTHTOKEN_VALIDITY_DURATION = 10L;
     public static final String AUTHTOKEN_PANTIE = "AUTHTOKEN_PANTIE";

@@ -35,9 +35,9 @@ import java.util.Map;
  * Created by Pierre Quételart on 12/01/2015.
  */
 public class AuthenticatorActivity extends AccountAuthenticatorActivity {
-    public final static String PARAM_USER_PASS = "USER_PASS";
     // View
     private static ProgressBar progressBar;
+    private String TAG = "AuthenticatorActivity";
     private AuthenticationState state = AuthenticationState.NOT_STARTED;
     private AccountManager accountManager;
     private Button button;
@@ -68,6 +68,7 @@ public class AuthenticatorActivity extends AccountAuthenticatorActivity {
     }
 
     public void submit() {
+        Log.d(TAG, " > submit");
         final String login = ((EditText) findViewById(R.id.login)).getText().toString();
         final String password = ((EditText) findViewById(R.id.pwd)).getText().toString();
 
@@ -83,10 +84,10 @@ public class AuthenticatorActivity extends AccountAuthenticatorActivity {
         final Response.ErrorListener errorListener = new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError volleyError) {
-                Log.e("LoginTask", "Error in authentication. Current state: " + getAuthenticationState());
-                Log.e("LoginTask", volleyError.getClass().getCanonicalName());
+                Log.e(TAG, "Error in authentication. Current state: " + getAuthenticationState());
+                Log.e(TAG, volleyError.getClass().getCanonicalName());
                 if (volleyError != null && volleyError.getMessage() != null) {
-                    Log.e("LoginTask", volleyError.getMessage());
+                    Log.e(TAG, volleyError.getMessage());
                 }
             }
         };
@@ -95,26 +96,25 @@ public class AuthenticatorActivity extends AccountAuthenticatorActivity {
             @Override
             public void onResponse(String response) {
                 setAuthenticationState(AuthenticationState.COOKIES);
-                Log.d("LoginTask", response);
+                Log.d(TAG, getAuthenticationState() + " > " + response);
                 // If the cookie request is successful, issue a POST to login
                 PrioritizedStringRequest loginRequest = new PrioritizedStringRequest(Request.Method.POST, Constants.LOGIN_URL, new Response.Listener<String>() {
                     @Override
                     public void onResponse(String response) {
                         setAuthenticationState(AuthenticationState.LOGIN);
-                        Log.d("LoginTask", response);
+                        Log.d(TAG, getAuthenticationState() + " > " + response);
                         // Get MC page to see if connection is ready
                         PrioritizedStringRequest minichatRequest = new PrioritizedStringRequest(Request.Method.GET, Constants.MC_URL, new Response.Listener<String>() {
                             @Override
                             public void onResponse(final String minichatResponse) {
                                 setAuthenticationState(AuthenticationState.MINICHAT);
-                                Log.d("LoginTask", minichatResponse);
+                                Log.d(TAG, getAuthenticationState() + " > " + minichatResponse);
                                 // When the login is successful, register to Pantie
-                                Log.d("Size", "Size:" + httpToolbox.getCookieStore().getCookies().size());
                                 PrioritizedStringRequest pantieRequest = new PrioritizedStringRequest(Request.Method.GET, Constants.PANTIE_URL + "/?session=" + HttpToolbox.getPantieId() + "&event=mc2-*-message", new Response.Listener<String>() {
                                     @Override
                                     public void onResponse(String response) {
                                         setAuthenticationState(AuthenticationState.PANTIE);
-                                        Log.d("LoginTask", response);
+                                        Log.d(TAG, getAuthenticationState() + " > " + response);
 
                                         // Trigger authentication valid
                                         Date targetTime = new Date(new Date().getTime() + (Constants.AUTHTOKEN_VALIDITY_DURATION * 60000));
@@ -129,17 +129,16 @@ public class AuthenticatorActivity extends AccountAuthenticatorActivity {
                                         List<Cookie> cookiesList = cookieStore.getCookies();
                                         for (Cookie cookie : cookiesList) {
                                             if (Constants.COOKIE_KEY.equals(cookie.getName())) {
+                                                Log.d(TAG, "Cookie > " + cookie.getName() + "=" + cookie.getValue());
                                                 authToken = cookie.getValue();
                                             }
                                         }
                                         data.putString(AccountManager.KEY_AUTHTOKEN, authToken);
                                         data.putString(AccountManager.KEY_ACCOUNT_NAME, login);
-                                        data.putString(PARAM_USER_PASS, password);
+                                        data.putString(AccountManager.KEY_PASSWORD, password);
                                         Intent res = new Intent();
                                         res.putExtras(data);
                                         finishLogin(res);
-                                        Log.d("ConnectTask", response);
-                                        Log.i("LoginTask", "End of LoginTask");
                                     }
                                 }, errorListener);
                                 pantieRequest.setPriority(Request.Priority.IMMEDIATE);
@@ -170,8 +169,9 @@ public class AuthenticatorActivity extends AccountAuthenticatorActivity {
     }
 
     public void finishLogin(Intent intent) {
+        Log.d(TAG, " > finishLogin");
         String login = intent.getStringExtra(AccountManager.KEY_ACCOUNT_NAME);
-        String password = intent.getStringExtra(PARAM_USER_PASS);
+        String password = intent.getStringExtra(AccountManager.KEY_PASSWORD);
         String authToken = intent.getStringExtra(AccountManager.KEY_AUTHTOKEN);
         String authTokenValidity = intent.getStringExtra(Constants.AUTHTOKEN_VALIDITY);
         String authTokenPantie = intent.getStringExtra(Constants.AUTHTOKEN_PANTIE);
@@ -217,7 +217,7 @@ public class AuthenticatorActivity extends AccountAuthenticatorActivity {
     }
 
     public void setAuthenticationState(AuthenticationState state) {
-        Log.i("LoginTask", "Changing authentication state from " + this.state + " to " + state);
+        Log.i(TAG, "> setAuthenticationState > Changing authentication state from " + this.state + " to " + state);
         this.state = state;
     }
 

@@ -8,6 +8,7 @@ import android.accounts.NetworkErrorException;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 
 import com.telnet.karibou.Constants;
 
@@ -21,6 +22,7 @@ import java.util.Date;
  * of its methods
  */
 public class AccountAuthenticator extends AbstractAccountAuthenticator {
+    private String TAG = "AccountAuthenticator";
     private Context context;
 
     public AccountAuthenticator(Context context) {
@@ -31,6 +33,7 @@ public class AccountAuthenticator extends AbstractAccountAuthenticator {
     @Override
     public Bundle addAccount(AccountAuthenticatorResponse response, String accountType, String authTokenType, String[] requiredFeatures, Bundle options)
             throws NetworkErrorException {
+        Log.d(TAG, " > addAccount");
         final Intent intent = new Intent(this.context, AuthenticatorActivity.class);
         intent.putExtra(Constants.ACCOUNT_TYPE, authTokenType);
         intent.putExtra(AccountManager.KEY_ACCOUNT_AUTHENTICATOR_RESPONSE, response);
@@ -46,6 +49,7 @@ public class AccountAuthenticator extends AbstractAccountAuthenticator {
 
     @Override
     public Bundle getAuthToken(AccountAuthenticatorResponse response, Account account, String authTokenType, Bundle options) throws NetworkErrorException {
+        Log.d(TAG, " > getAuthToken");
         final AccountManager accountManager = AccountManager.get(context);
 
         // Ask AccountManager for the auth-token
@@ -57,12 +61,14 @@ public class AccountAuthenticator extends AbstractAccountAuthenticator {
 
         // Cookie has expired
         if (validityTime.compareTo(currentTime) > 0) {
+            Log.d(TAG, " > getAuthToken > Cookie has expired");
             accountManager.invalidateAuthToken(Constants.ACCOUNT_TYPE, authToken);
         } else {
             final Bundle result = new Bundle();
             result.putString(AccountManager.KEY_ACCOUNT_NAME, account.name);
             result.putString(AccountManager.KEY_ACCOUNT_TYPE, account.type);
             result.putString(AccountManager.KEY_AUTHTOKEN, authToken);
+            result.putString(Constants.AUTHTOKEN_PANTIE, accountManager.getUserData(account, Constants.AUTHTOKEN_PANTIE));
             return result;
         }
 
