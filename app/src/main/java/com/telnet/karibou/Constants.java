@@ -13,10 +13,16 @@ public class Constants {
     public static final String FLASHMAIL_READ_URL = BASE_URL + "/flashmail/setasread/";
     public static final String FLASHMAIL_SEND = BASE_URL + "/flashmail/send/";
     public static final String USER_LIST_URL = BASE_URL + "/onlineusers/listJSON/";
+    public static final String ACCOUNT_TYPE = "com.telnet.karibou.account";
+    public static final String AUTHTOKEN_TYPE_FULL_ACCESS = "Full access";
+    public static final String AUTHTOKEN_TYPE_FULL_ACCESS_LABEL = "Full access";
+    public static final String AUTHTOKEN_VALIDITY = "AUTHTOKEN_VALIDITY";
+    public static final Long AUTHTOKEN_VALIDITY_DURATION = 10L;
+    public static final String AUTHTOKEN_PANTIE = "AUTHTOKEN_PANTIE";
+    public static final String COOKIE_KEY = "PHPSESSID";
     protected static final int USER_LIST_REFRESH = 30;
     protected static final int PRESENCE_REFRESH = 240;
     protected static final int FLASHMAIL_REFRESH = 60;
     protected static final int NOTIFICATION_ID = 1;
-
     protected static final int RESULT_SETTINGS = 1;
 }

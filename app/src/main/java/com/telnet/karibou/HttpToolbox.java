@@ -13,6 +13,7 @@ import com.android.volley.toolbox.HttpStack;
 import com.android.volley.toolbox.ImageLoader;
 import com.android.volley.toolbox.Volley;
 
+import org.apache.http.client.CookieStore;
 import org.apache.http.conn.ClientConnectionManager;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.impl.conn.tsccm.ThreadSafeClientConnManager;
@@ -28,6 +29,7 @@ public class HttpToolbox {
     private static Context mCtx;
     private static String pantieId;
     private static CookieManager cookieManager;
+    private static DefaultHttpClient mDefaultHttpClient;
     private RequestQueue mRequestQueue;
     private ImageLoader mImageLoader;
 
@@ -82,7 +84,7 @@ public class HttpToolbox {
             CookieHandler.setDefault(cookieManager);
             mRequestQueue = Volley.newRequestQueue(mCtx.getApplicationContext());*/
 
-            DefaultHttpClient mDefaultHttpClient = new DefaultHttpClient();
+            mDefaultHttpClient = new DefaultHttpClient();
 
             final ClientConnectionManager mClientConnectionManager = mDefaultHttpClient.getConnectionManager();
             final HttpParams mHttpParams = mDefaultHttpClient.getParams();
@@ -97,8 +99,8 @@ public class HttpToolbox {
         return mRequestQueue;
     }
 
-    public CookieManager getCookieManager() {
-        return cookieManager;
+    public CookieStore getCookieStore() {
+        return mDefaultHttpClient.getCookieStore();
     }
 
     /**

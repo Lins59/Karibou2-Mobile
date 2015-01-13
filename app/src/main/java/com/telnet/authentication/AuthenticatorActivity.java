@@ -1,15 +1,11 @@
-package com.telnet.karibou;
+package com.telnet.authentication;
 
-import android.app.AlertDialog;
-import android.content.Context;
-import android.content.DialogInterface;
+import android.accounts.Account;
+import android.accounts.AccountAuthenticatorActivity;
+import android.accounts.AccountManager;
+import android.content.ContentResolver;
 import android.content.Intent;
-import android.content.SharedPreferences;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
-import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -21,122 +17,62 @@ import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
+import com.telnet.karibou.Constants;
+import com.telnet.karibou.HttpToolbox;
+import com.telnet.karibou.PrioritizedStringRequest;
+import com.telnet.karibou.R;
+import com.telnet.sync.FlashmailsContract;
 
-import org.json.JSONArray;
-import org.json.JSONException;
+import org.apache.http.client.CookieStore;
+import org.apache.http.cookie.Cookie;
 
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
-public class LoginActivity extends ActionBarActivity {
+/**
+ * Created by Pierre Quételart on 12/01/2015.
+ */
+public class AuthenticatorActivity extends AccountAuthenticatorActivity {
+    public final static String PARAM_USER_PASS = "USER_PASS";
+    // View
     private static ProgressBar progressBar;
-    public String loginText = "", passwordText = "";
-    SharedPreferences prefs;
+    private AuthenticationState state = AuthenticationState.NOT_STARTED;
+    private AccountManager accountManager;
     private Button button;
     private EditText login, pwd;
-    private LoginActivity l = this;
-    private AuthenticationState state = AuthenticationState.NOT_STARTED;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_login);
+    protected void onCreate(Bundle bundle) {
+        super.onCreate(bundle);
 
+        // Create account manager
+        accountManager = AccountManager.get(getBaseContext());
+
+        // Create view
+        setContentView(R.layout.activity_login);
         this.button = (Button) findViewById(R.id.button);
         this.login = (EditText) findViewById(R.id.login);
         this.progressBar = (ProgressBar) findViewById(R.id.progressBar);
         this.progressBar.setVisibility(View.INVISIBLE);
         this.pwd = (EditText) findViewById(R.id.pwd);
 
-        this.button.setOnClickListener(new View.OnClickListener() {
-            @SuppressWarnings("deprecation")
+        // Listeners
+        findViewById(R.id.button).setOnClickListener(new View.OnClickListener() {
+            @Override
             public void onClick(View v) {
-                loginText = login.getText().toString();
-                passwordText = pwd.getText().toString();
-
-                toggleView(true);
-                triggerAuthentication(loginText, passwordText);
+                submit();
             }
         });
-        this.prefs = PreferenceManager.getDefaultSharedPreferences(this);
-        if (prefs.getString("login", null) != null) {
-            this.login.setText(prefs.getString("login", null));
-        }
-
-        // Check connectivity
-        ConnectivityManager cm =
-                (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
-        NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
-        boolean isConnected = activeNetwork != null &&
-                activeNetwork.isConnectedOrConnecting();
-
-        if (isConnected) {
-            // Get login and password from prefs
-            if (prefs.getString("login", null) != null && prefs.getString("password", null) != null) {
-                toggleView(true);
-                loginText = prefs.getString("login", null);
-                passwordText = prefs.getString("password", null);
-                triggerAuthentication(loginText, passwordText);
-            }
-        } else {
-            AlertDialog.Builder alertBuilder = new AlertDialog.Builder(this);
-            alertBuilder.setMessage(R.string.no_connection);
-            alertBuilder.setCancelable(false);
-            alertBuilder.setPositiveButton(R.string.taking_risk,
-                    new DialogInterface.OnClickListener() {
-                        public void onClick(DialogInterface dialog, int id) {
-                            dialog.cancel();
-                        }
-                    });
-
-            AlertDialog alert = alertBuilder.create();
-            alert.show();
-        }
     }
 
-    @Override
-    public void onResume() {
-        super.onResume();
-        Log.d("LoginActivity", "onResume called");
-    }
+    public void submit() {
+        final String login = ((EditText) findViewById(R.id.login)).getText().toString();
+        final String password = ((EditText) findViewById(R.id.pwd)).getText().toString();
 
-    @Override
-    public void onPause() {
-        super.onPause();
-        Log.d("LoginActivity", "onPause called");
-    }
+        toggleView(true);
 
-    public void toggleView(Boolean duringLogin) {
-        if (duringLogin) {
-            // Make progress bar visible
-            progressBar.setVisibility(View.VISIBLE);
-
-            // Clear all unused elements
-            button.setVisibility(View.GONE);
-            login.setVisibility(View.INVISIBLE);
-            pwd.setVisibility(View.INVISIBLE);
-        } else {
-            // Make progress bar invisible
-            progressBar.setVisibility(View.INVISIBLE);
-
-            // Make all other elements visible
-            button.setVisibility(View.VISIBLE);
-            login.setVisibility(View.VISIBLE);
-            pwd.setVisibility(View.VISIBLE);
-        }
-    }
-
-    public AuthenticationState getAuthenticationState() {
-        return state;
-    }
-
-    public void setAuthenticationState(AuthenticationState state) {
-        Log.i("LoginTask", "Changing authentication state from " + this.state + " to " + state);
-        this.state = state;
-    }
-
-    public void triggerAuthentication(final String login, final String password) {
         // Generate pantie id and save it for later use
         HttpToolbox.setPantieId(generateId());
 
@@ -148,7 +84,10 @@ public class LoginActivity extends ActionBarActivity {
             @Override
             public void onErrorResponse(VolleyError volleyError) {
                 Log.e("LoginTask", "Error in authentication. Current state: " + getAuthenticationState());
-                Log.e("LoginTask", volleyError.getMessage());
+                Log.e("LoginTask", volleyError.getClass().getCanonicalName());
+                if (volleyError != null && volleyError.getMessage() != null) {
+                    Log.e("LoginTask", volleyError.getMessage());
+                }
             }
         };
 
@@ -178,7 +117,27 @@ public class LoginActivity extends ActionBarActivity {
                                         Log.d("LoginTask", response);
 
                                         // Trigger authentication valid
-                                        authenticationValid(minichatResponse);
+                                        Date targetTime = new Date(new Date().getTime() + (Constants.AUTHTOKEN_VALIDITY_DURATION * 60000));
+                                        String authTokenValidity = String.valueOf(targetTime.getTime());
+                                        Bundle data = new Bundle();
+                                        data.putString(Constants.AUTHTOKEN_VALIDITY, authTokenValidity);
+                                        data.putString(Constants.AUTHTOKEN_PANTIE, HttpToolbox.getPantieId());
+
+                                        // Get PHP Session Id from Cookie Store
+                                        String authToken = "";
+                                        CookieStore cookieStore = HttpToolbox.getInstance(getApplicationContext()).getCookieStore();
+                                        List<Cookie> cookiesList = cookieStore.getCookies();
+                                        for (Cookie cookie : cookiesList) {
+                                            if (Constants.COOKIE_KEY.equals(cookie.getName())) {
+                                                authToken = cookie.getValue();
+                                            }
+                                        }
+                                        data.putString(AccountManager.KEY_AUTHTOKEN, authToken);
+                                        data.putString(AccountManager.KEY_ACCOUNT_NAME, login);
+                                        data.putString(PARAM_USER_PASS, password);
+                                        Intent res = new Intent();
+                                        res.putExtras(data);
+                                        finishLogin(res);
                                         Log.d("ConnectTask", response);
                                         Log.i("LoginTask", "End of LoginTask");
                                     }
@@ -210,34 +169,56 @@ public class LoginActivity extends ActionBarActivity {
         httpToolbox.addToRequestQueue(cookiesRequest, "LOGIN");
     }
 
-    public void authenticationValid(String mcResult) {
-        // Login is successful if result is JSONArray
-        try {
-            new JSONArray(mcResult);
-            SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
-            prefs.edit().putString("login", loginText).apply();
-            prefs.edit().putString("password", passwordText).apply();
+    public void finishLogin(Intent intent) {
+        String login = intent.getStringExtra(AccountManager.KEY_ACCOUNT_NAME);
+        String password = intent.getStringExtra(PARAM_USER_PASS);
+        String authToken = intent.getStringExtra(AccountManager.KEY_AUTHTOKEN);
+        String authTokenValidity = intent.getStringExtra(Constants.AUTHTOKEN_VALIDITY);
+        String authTokenPantie = intent.getStringExtra(Constants.AUTHTOKEN_PANTIE);
 
-            Intent intent = new Intent(getBaseContext(), MainActivity.class);
-            startActivity(intent);
-            finish();
-        } catch (JSONException e) {
-            login.setText(prefs.getString("login", ""));
-            pwd.setText("");
-            AlertDialog.Builder alertBuilder = new AlertDialog.Builder(this);
-            alertBuilder.setMessage(R.string.wrong_password);
-            alertBuilder.setCancelable(false);
-            alertBuilder.setPositiveButton(R.string.ok,
-                    new DialogInterface.OnClickListener() {
-                        public void onClick(DialogInterface dialog, int id) {
-                            dialog.cancel();
-                        }
-                    });
+        Bundle userData = new Bundle();
+        userData.putString(Constants.AUTHTOKEN_VALIDITY, authTokenValidity);
+        userData.putString(Constants.AUTHTOKEN_PANTIE, authTokenPantie);
 
-            AlertDialog alert = alertBuilder.create();
-            alert.show();
-            toggleView(false);
+        // Creating the account on the device and setting the auth token we got
+        // (Not setting the auth token will cause another call to the server to authenticate the user)
+        final Account account = new Account(login, Constants.ACCOUNT_TYPE);
+        accountManager.addAccountExplicitly(account, password, null);
+        accountManager.setAuthToken(account, Constants.AUTHTOKEN_TYPE_FULL_ACCESS, authToken);
+
+        // Set Syncable
+        ContentResolver.setIsSyncable(account, FlashmailsContract.AUTHORITY, 1);
+        ContentResolver.setSyncAutomatically(account, FlashmailsContract.AUTHORITY, true);
+
+        this.setResult(RESULT_OK, intent);
+        this.finish();
+    }
+
+    public void toggleView(Boolean duringLogin) {
+        if (duringLogin) {
+            // Make progress bar visible
+            progressBar.setVisibility(View.VISIBLE);
+            // Clear all unused elements
+            button.setVisibility(View.GONE);
+            login.setVisibility(View.INVISIBLE);
+            pwd.setVisibility(View.INVISIBLE);
+        } else {
+            // Make progress bar invisible
+            progressBar.setVisibility(View.INVISIBLE);
+            // Make all other elements visible
+            button.setVisibility(View.VISIBLE);
+            login.setVisibility(View.VISIBLE);
+            pwd.setVisibility(View.VISIBLE);
         }
+    }
+
+    public AuthenticationState getAuthenticationState() {
+        return state;
+    }
+
+    public void setAuthenticationState(AuthenticationState state) {
+        Log.i("LoginTask", "Changing authentication state from " + this.state + " to " + state);
+        this.state = state;
     }
 
     public String generateId() {
