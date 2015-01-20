@@ -7,6 +7,7 @@ import android.content.ContentProviderClient;
 import android.content.Context;
 import android.content.SyncResult;
 import android.os.Bundle;
+import android.util.Log;
 
 import com.telnet.karibou.Constants;
 import com.telnet.objects.Flashmail;
@@ -18,6 +19,7 @@ import java.util.List;
  */
 public class FlashmailSyncAdapter extends AbstractThreadedSyncAdapter {
     private final AccountManager mAccountManager;
+    private String TAG = "FlashmailSyncAdapter";
 
     public FlashmailSyncAdapter(Context context, boolean autoInitialize) {
         super(context, autoInitialize);
@@ -26,9 +28,11 @@ public class FlashmailSyncAdapter extends AbstractThreadedSyncAdapter {
 
     @Override
     public void onPerformSync(Account account, Bundle extras, String authority, ContentProviderClient provider, SyncResult syncResult) {
+        Log.d(TAG, " > onPerformSync");
         try {
             // Get the auth token for the current account
-            String authToken = mAccountManager.blockingGetAuthToken(account, Constants.ACCOUNT_TYPE, true);
+            String authToken = mAccountManager.blockingGetAuthToken(account, Constants.AUTHTOKEN_TYPE_FULL_ACCESS, true);
+            Log.d(TAG, "We have retrieved this authToken: " + authToken);
 
             // TODO GET REMOTE FM
             List<Flashmail> remoteFlashmails;

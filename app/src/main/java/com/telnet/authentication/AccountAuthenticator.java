@@ -8,6 +8,7 @@ import android.accounts.NetworkErrorException;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.util.Log;
 
 import com.telnet.karibou.Constants;
@@ -52,18 +53,33 @@ public class AccountAuthenticator extends AbstractAccountAuthenticator {
         Log.d(TAG, " > getAuthToken");
         final AccountManager accountManager = AccountManager.get(context);
 
-        // Ask AccountManager for the auth-token
-        String authToken = accountManager.peekAuthToken(account, authTokenType);
+        // See if there is already an authentication token stored
+        String authToken = accountManager.peekAuthToken(account, Constants.AUTHTOKEN_TYPE_FULL_ACCESS);
 
         // Look for validity
-        Date validityTime = new Date(accountManager.getUserData(account, Constants.AUTHTOKEN_VALIDITY));
-        Date currentTime = new Date();
-
+        boolean hasError = false;
+        Date validityTime = null, currentTime = null;
+        try {
+            String timestamp = accountManager.getUserData(account, Constants.AUTHTOKEN_VALIDITY);
+            validityTime = new Date(Long.parseLong(timestamp));
+            currentTime = new Date();
+        } catch (NumberFormatException e) {
+            hasError = true;
+        }
+        // If we have no token, use the account credentials to fetch
+        // a new one, effectively another logon
         // Cookie has expired
-        if (validityTime.compareTo(currentTime) > 0) {
+        if (hasError || validityTime == null || currentTime == null || validityTime.before(currentTime)) {
             Log.d(TAG, " > getAuthToken > Cookie has expired");
             accountManager.invalidateAuthToken(Constants.ACCOUNT_TYPE, authToken);
-        } else {
+
+            return getAuthToken(response, account, authTokenType, options);
+        }
+
+
+        // If we either got a cached token, or fetched a new one, hand
+        // it back to the client that called us.
+        if (!TextUtils.isEmpty(authToken)) {
             final Bundle result = new Bundle();
             result.putString(AccountManager.KEY_ACCOUNT_NAME, account.name);
             result.putString(AccountManager.KEY_ACCOUNT_TYPE, account.type);
@@ -72,7 +88,27 @@ public class AccountAuthenticator extends AbstractAccountAuthenticator {
             return result;
         }
 
+        // If we get here, then we don't have a token, and we don't have
+        // a password that will let us get a new one (or we weren't able
+        // to use the password we do have).  We need to fetch
+        // information from the user, we do that by creating an Intent
+        // to an Activity child class.
+        final Intent intent = new Intent(context, AuthenticatorActivity.class);
+
+        // We want to give the Activity the information we want it to
+        // return to the AccountManager.  We'll cover that with the
+        // KEY_ACCOUNT_AUTHENTICATOR_RESPONSE parameter.
+        intent.putExtra(AccountManager.KEY_ACCOUNT_AUTHENTICATOR_RESPONSE,
+                response);
+        // We'll also give it the parameters we've already looked up, or
+        // were given.
+        /*intent.putExtra(LoginActivity.ARG_IS_ADDING_NEW_ACCOUNT, false);
+        intent.putExtra(LoginActivity.ARG_ACCOUNT_NAME, account.name);
+        intent.putExtra(LoginActivity.ARG_ACCOUNT_TYPE, account.type);
+        intent.putExtra(LoginActivity.ARG_AUTH_TYPE, authTokenType);*/
+
         final Bundle bundle = new Bundle();
+        bundle.putParcelable(AccountManager.KEY_INTENT, intent);
         return bundle;
     }
 

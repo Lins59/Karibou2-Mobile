@@ -27,10 +27,11 @@ public class MainActivity extends FragmentActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+
         setContentView(R.layout.activity_main);
 
         TabAdapter = new TabPagerAdapter(getSupportFragmentManager());
-
         Tab = (ViewPager) findViewById(R.id.pager);
 
         // Considere all three tabs visible (do not call onPause on them)
@@ -120,6 +121,7 @@ public class MainActivity extends FragmentActivity {
         // Cancel timer
         timer.cancel();
     }
+
 
     private class PresenceTimerTask extends TimerTask {
         @Override

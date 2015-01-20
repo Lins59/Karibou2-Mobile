@@ -1,14 +1,14 @@
 package com.telnet.karibou;
 
-import android.app.AlertDialog;
-import android.content.Context;
-import android.content.DialogInterface;
+import android.accounts.Account;
+import android.accounts.AccountManager;
+import android.accounts.AccountManagerCallback;
+import android.accounts.AccountManagerFuture;
+import android.accounts.AuthenticatorException;
+import android.accounts.OperationCanceledException;
 import android.content.Intent;
-import android.content.SharedPreferences;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
+import android.os.Handler;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.view.View;
@@ -16,27 +16,17 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ProgressBar;
 
-import com.android.volley.AuthFailureError;
-import com.android.volley.DefaultRetryPolicy;
-import com.android.volley.Request;
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
+import java.io.IOException;
 
 public class LoginActivity extends ActionBarActivity {
+    private static int ACCOUNT_CHOOSER_ACTIVITY = 1;
     private static ProgressBar progressBar;
-    public String loginText = "", passwordText = "";
-    SharedPreferences prefs;
+    private String TAG = "LoginActivity";
+    private AccountManager accountManager;
+    private Account account;
+    private String authToken;
     private Button button;
     private EditText login, pwd;
-    private LoginActivity l = this;
-    private AuthenticationState state = AuthenticationState.NOT_STARTED;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,62 +39,51 @@ public class LoginActivity extends ActionBarActivity {
         this.progressBar.setVisibility(View.INVISIBLE);
         this.pwd = (EditText) findViewById(R.id.pwd);
 
-        this.button.setOnClickListener(new View.OnClickListener() {
-            @SuppressWarnings("deprecation")
-            public void onClick(View v) {
-                loginText = login.getText().toString();
-                passwordText = pwd.getText().toString();
+        toggleView(true);
 
-                toggleView(true);
-                triggerAuthentication(loginText, passwordText);
-            }
-        });
-        this.prefs = PreferenceManager.getDefaultSharedPreferences(this);
-        if (prefs.getString("login", null) != null) {
-            this.login.setText(prefs.getString("login", null));
-        }
+        // Call authenticator
+        accountManager = AccountManager.get(getApplicationContext());
 
-        // Check connectivity
-        ConnectivityManager cm =
-                (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
-        NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
-        boolean isConnected = activeNetwork != null &&
-                activeNetwork.isConnectedOrConnecting();
-
-        if (isConnected) {
-            // Get login and password from prefs
-            if (prefs.getString("login", null) != null && prefs.getString("password", null) != null) {
-                toggleView(true);
-                loginText = prefs.getString("login", null);
-                passwordText = prefs.getString("password", null);
-                triggerAuthentication(loginText, passwordText);
-            }
+        // Select good account or add one
+        Account[] acc = accountManager.getAccountsByType(Constants.ACCOUNT_TYPE);
+        if (acc.length == 0) {
+            Log.e(TAG, "No accounts of type " + Constants.ACCOUNT_TYPE + " found");
+            Log.d(TAG, "Adding account of type " + Constants.ACCOUNT_TYPE + " found");
+            accountManager.addAccount(
+                    Constants.ACCOUNT_TYPE,
+                    Constants.AUTHTOKEN_TYPE_FULL_ACCESS,
+                    null,
+                    new Bundle(),
+                    this,
+                    new OnAccountAddComplete(),
+                    null);
         } else {
-            AlertDialog.Builder alertBuilder = new AlertDialog.Builder(this);
-            alertBuilder.setMessage(R.string.no_connection);
-            alertBuilder.setCancelable(false);
-            alertBuilder.setPositiveButton(R.string.taking_risk,
-                    new DialogInterface.OnClickListener() {
-                        public void onClick(DialogInterface dialog, int id) {
-                            dialog.cancel();
-                        }
-                    });
+            Log.i(TAG, "Found " + acc.length + " accounts of type " + Constants.ACCOUNT_TYPE);
 
-            AlertDialog alert = alertBuilder.create();
-            alert.show();
+            Intent intent = AccountManager.newChooseAccountIntent(
+                    null,
+                    null,
+                    new String[]{Constants.ACCOUNT_TYPE},
+                    false,
+                    null,
+                    Constants.AUTHTOKEN_TYPE_FULL_ACCESS,
+                    null,
+                    null);
+
+            startActivityForResult(intent, ACCOUNT_CHOOSER_ACTIVITY);
         }
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        Log.d("LoginActivity", "onResume called");
+        Log.d(TAG, " > onResume");
     }
 
     @Override
     public void onPause() {
         super.onPause();
-        Log.d("LoginActivity", "onPause called");
+        Log.d(TAG, " > onPause");
     }
 
     public void toggleView(Boolean duringLogin) {
@@ -127,130 +106,85 @@ public class LoginActivity extends ActionBarActivity {
         }
     }
 
-    public AuthenticationState getAuthenticationState() {
-        return state;
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        Log.d(TAG, " > onActivityResult");
+        if (resultCode == RESULT_CANCELED)
+            return;
+        if (requestCode == ACCOUNT_CHOOSER_ACTIVITY) {
+            Bundle bundle = data.getExtras();
+            this.account = new Account(
+                    bundle.getString(AccountManager.KEY_ACCOUNT_NAME),
+                    bundle.getString(AccountManager.KEY_ACCOUNT_TYPE)
+            );
+            Log.d(TAG, "Selected account " + account.name + ", fetching");
+            startAuthTokenFetch();
+        }
     }
 
-    public void setAuthenticationState(AuthenticationState state) {
-        Log.i("LoginTask", "Changing authentication state from " + this.state + " to " + state);
-        this.state = state;
+    private void startAuthTokenFetch() {
+        Log.d(TAG, " > startAuthTokenFetch");
+        Bundle options = new Bundle();
+        accountManager.getAuthToken(
+                account,
+                Constants.ACCOUNT_TYPE,
+                options,
+                true,
+                new OnAccountManagerComplete(),
+                new Handler()
+        );
     }
 
-    public void triggerAuthentication(final String login, final String password) {
-        // Generate pantie id and save it for later use
-        HttpToolbox.setPantieId(generateId());
 
-        // Get RequestQueue
-        final HttpToolbox httpToolbox = HttpToolbox.getInstance(getApplicationContext());
-
-        // Generate error listener
-        final Response.ErrorListener errorListener = new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError volleyError) {
-                Log.e("LoginTask", "Error in authentication. Current state: " + getAuthenticationState());
-                Log.e("LoginTask", volleyError.getMessage());
+    private class OnAccountManagerComplete implements AccountManagerCallback<Bundle> {
+        @Override
+        public void run(AccountManagerFuture<Bundle> result) {
+            Log.d(TAG, " > onAccountManagerComplete");
+            Bundle bundle;
+            try {
+                bundle = result.getResult();
+            } catch (OperationCanceledException e) {
+                e.printStackTrace();
+                return;
+            } catch (AuthenticatorException e) {
+                e.printStackTrace();
+                return;
+            } catch (IOException e) {
+                e.printStackTrace();
+                return;
             }
-        };
-
-        PrioritizedStringRequest cookiesRequest = new PrioritizedStringRequest(Request.Method.GET, Constants.HOME_URL, new Response.Listener<String>() {
-            @Override
-            public void onResponse(String response) {
-                setAuthenticationState(AuthenticationState.COOKIES);
-                Log.d("LoginTask", response);
-                // If the cookie request is successful, issue a POST to login
-                PrioritizedStringRequest loginRequest = new PrioritizedStringRequest(Request.Method.POST, Constants.LOGIN_URL, new Response.Listener<String>() {
-                    @Override
-                    public void onResponse(String response) {
-                        setAuthenticationState(AuthenticationState.LOGIN);
-                        Log.d("LoginTask", response);
-                        // Get MC page to see if connection is ready
-                        PrioritizedStringRequest minichatRequest = new PrioritizedStringRequest(Request.Method.GET, Constants.MC_URL, new Response.Listener<String>() {
-                            @Override
-                            public void onResponse(final String minichatResponse) {
-                                setAuthenticationState(AuthenticationState.MINICHAT);
-                                Log.d("LoginTask", minichatResponse);
-                                // When the login is successful, register to Pantie
-                                Log.d("Size", "Size:" + httpToolbox.getCookieStore().getCookies().size());
-                                PrioritizedStringRequest pantieRequest = new PrioritizedStringRequest(Request.Method.GET, Constants.PANTIE_URL + "/?session=" + HttpToolbox.getPantieId() + "&event=mc2-*-message", new Response.Listener<String>() {
-                                    @Override
-                                    public void onResponse(String response) {
-                                        setAuthenticationState(AuthenticationState.PANTIE);
-                                        Log.d("LoginTask", response);
-
-                                        // Trigger authentication valid
-                                        authenticationValid(minichatResponse);
-                                        Log.d("ConnectTask", response);
-                                        Log.i("LoginTask", "End of LoginTask");
-                                    }
-                                }, errorListener);
-                                pantieRequest.setPriority(Request.Priority.IMMEDIATE);
-                                httpToolbox.addToRequestQueue(pantieRequest, "LOGIN");
-
-
-                            }
-                        }, errorListener);
-                        minichatRequest.setPriority(Request.Priority.IMMEDIATE);
-                        httpToolbox.addToRequestQueue(minichatRequest, "LOGIN");
-                    }
-                }, errorListener) {
-                    @Override
-                    protected Map<String, String> getParams() throws AuthFailureError {
-                        Map<String, String> params = new HashMap<String, String>();
-                        params.put("_user", login);
-                        params.put("_pass", password);
-                        return params;
-                    }
-                };
-                loginRequest.setRetryPolicy(new DefaultRetryPolicy(30000, 0, 0));
-                loginRequest.setPriority(Request.Priority.IMMEDIATE);
-                httpToolbox.addToRequestQueue(loginRequest, "LOGIN");
-            }
-        }, errorListener);
-        cookiesRequest.setPriority(Request.Priority.IMMEDIATE);
-        httpToolbox.addToRequestQueue(cookiesRequest, "LOGIN");
-    }
-
-    public void authenticationValid(String mcResult) {
-        // Login is successful if result is JSONArray
-        try {
-            new JSONArray(mcResult);
-            SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
-            prefs.edit().putString("login", loginText).apply();
-            prefs.edit().putString("password", passwordText).apply();
+            authToken = bundle.getString(AccountManager.KEY_AUTHTOKEN);
+            Log.d(TAG, "Received authentication token " + authToken);
 
             Intent intent = new Intent(getBaseContext(), MainActivity.class);
             startActivity(intent);
             finish();
-        } catch (JSONException e) {
-            login.setText(prefs.getString("login", ""));
-            pwd.setText("");
-            AlertDialog.Builder alertBuilder = new AlertDialog.Builder(this);
-            alertBuilder.setMessage(R.string.wrong_password);
-            alertBuilder.setCancelable(false);
-            alertBuilder.setPositiveButton(R.string.ok,
-                    new DialogInterface.OnClickListener() {
-                        public void onClick(DialogInterface dialog, int id) {
-                            dialog.cancel();
-                        }
-                    });
-
-            AlertDialog alert = alertBuilder.create();
-            alert.show();
-            toggleView(false);
         }
     }
 
-    public String generateId() {
-        Date d = new Date();
-        int id1 = (int) ((d.getTime() + Math.floor(Math.random() * 10000000)) % 100000000);
-        int id2 = (int) ((d.getTime() + Math.floor(Math.random() * 10000000)) % 100000000);
-        int id3 = (int) ((d.getTime() + Math.floor(Math.random() * 10000000)) % 100000000);
-        int id4 = (int) ((d.getTime() + Math.floor(Math.random() * 10000000)) % 100000000);
-        return Integer.toString(id1) + Integer.toString(id2) +
-                Integer.toString(id3) + Integer.toString(id4);
-    }
-
-    private enum AuthenticationState {
-        NOT_STARTED, COOKIES, LOGIN, MINICHAT, PANTIE;
+    private class OnAccountAddComplete implements AccountManagerCallback<Bundle> {
+        @Override
+        public void run(AccountManagerFuture<Bundle> result) {
+            Log.d(TAG, " > onAccountAddComplete");
+            Bundle bundle;
+            try {
+                bundle = result.getResult();
+            } catch (OperationCanceledException e) {
+                e.printStackTrace();
+                return;
+            } catch (AuthenticatorException e) {
+                e.printStackTrace();
+                return;
+            } catch (IOException e) {
+                e.printStackTrace();
+                return;
+            }
+            account = new Account(
+                    bundle.getString(AccountManager.KEY_ACCOUNT_NAME),
+                    bundle.getString(AccountManager.KEY_ACCOUNT_TYPE)
+            );
+            Log.d(TAG, "Added account " + account.name + ", fetching");
+            startAuthTokenFetch();
+        }
     }
 }

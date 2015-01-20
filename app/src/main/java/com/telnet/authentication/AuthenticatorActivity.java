@@ -35,7 +35,6 @@ import java.util.Map;
  * Created by Pierre Quételart on 12/01/2015.
  */
 public class AuthenticatorActivity extends AccountAuthenticatorActivity {
-    // View
     private static ProgressBar progressBar;
     private String TAG = "AuthenticatorActivity";
     private AuthenticationState state = AuthenticationState.NOT_STARTED;
@@ -48,7 +47,7 @@ public class AuthenticatorActivity extends AccountAuthenticatorActivity {
         super.onCreate(bundle);
 
         // Create account manager
-        accountManager = AccountManager.get(getBaseContext());
+        accountManager = AccountManager.get(getApplicationContext());
 
         // Create view
         setContentView(R.layout.activity_login);
@@ -57,7 +56,6 @@ public class AuthenticatorActivity extends AccountAuthenticatorActivity {
         this.progressBar = (ProgressBar) findViewById(R.id.progressBar);
         this.progressBar.setVisibility(View.INVISIBLE);
         this.pwd = (EditText) findViewById(R.id.pwd);
-
         // Listeners
         findViewById(R.id.button).setOnClickListener(new View.OnClickListener() {
             @Override
@@ -69,10 +67,10 @@ public class AuthenticatorActivity extends AccountAuthenticatorActivity {
 
     public void submit() {
         Log.d(TAG, " > submit");
+        toggleView(true);
+
         final String login = ((EditText) findViewById(R.id.login)).getText().toString();
         final String password = ((EditText) findViewById(R.id.pwd)).getText().toString();
-
-        toggleView(true);
 
         // Generate pantie id and save it for later use
         HttpToolbox.setPantieId(generateId());
@@ -120,6 +118,7 @@ public class AuthenticatorActivity extends AccountAuthenticatorActivity {
                                         Date targetTime = new Date(new Date().getTime() + (Constants.AUTHTOKEN_VALIDITY_DURATION * 60000));
                                         String authTokenValidity = String.valueOf(targetTime.getTime());
                                         Bundle data = new Bundle();
+                                        data.putString(AccountManager.KEY_ACCOUNT_TYPE, Constants.ACCOUNT_TYPE);
                                         data.putString(Constants.AUTHTOKEN_VALIDITY, authTokenValidity);
                                         data.putString(Constants.AUTHTOKEN_PANTIE, HttpToolbox.getPantieId());
 
@@ -183,15 +182,17 @@ public class AuthenticatorActivity extends AccountAuthenticatorActivity {
         // Creating the account on the device and setting the auth token we got
         // (Not setting the auth token will cause another call to the server to authenticate the user)
         final Account account = new Account(login, Constants.ACCOUNT_TYPE);
-        accountManager.addAccountExplicitly(account, password, null);
+        accountManager.addAccountExplicitly(account, password, userData);
+
         accountManager.setAuthToken(account, Constants.AUTHTOKEN_TYPE_FULL_ACCESS, authToken);
 
         // Set Syncable
         ContentResolver.setIsSyncable(account, FlashmailsContract.AUTHORITY, 1);
         ContentResolver.setSyncAutomatically(account, FlashmailsContract.AUTHORITY, true);
 
-        this.setResult(RESULT_OK, intent);
-        this.finish();
+        setAccountAuthenticatorResult(intent.getExtras());
+        setResult(RESULT_OK, intent);
+        finish();
     }
 
     public void toggleView(Boolean duringLogin) {
