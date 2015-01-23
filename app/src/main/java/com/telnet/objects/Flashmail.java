@@ -1,5 +1,10 @@
 package com.telnet.objects;
 
+import android.content.ContentValues;
+import android.database.Cursor;
+
+import com.telnet.sync.FlashmailsDbHelper;
+
 import java.util.Date;
 
 public class Flashmail {
@@ -17,6 +22,25 @@ public class Flashmail {
         this.sender = sender;
         this.date = date;
         this.message = message;
+    }
+
+    // Create a TvShow object from a cursor
+    public static Flashmail fromCursor(Cursor curFlashmail) {
+        String id = curFlashmail.getString(curFlashmail.getColumnIndex(FlashmailsDbHelper.FLASHMAILS_COL_ID));
+        String message = curFlashmail.getString(curFlashmail.getColumnIndex(FlashmailsDbHelper.FLASHMAILS_COL_MESSAGE));
+        String oldMessage = curFlashmail.getString(curFlashmail.getColumnIndex(FlashmailsDbHelper.FLASHMAILS_COL_OLD_MESSAGE));
+        Flashmail fm = new Flashmail(id);
+        fm.setMessage(message);
+        fm.setOldMessage(oldMessage);
+        return fm;
+    }
+
+    public ContentValues getContentValues() {
+        ContentValues values = new ContentValues();
+        values.put(FlashmailsDbHelper.FLASHMAILS_COL_ID, id);
+        values.put(FlashmailsDbHelper.FLASHMAILS_COL_MESSAGE, message);
+        values.put(FlashmailsDbHelper.FLASHMAILS_COL_OLD_MESSAGE, oldMessage);
+        return values;
     }
 
     public String getId() {

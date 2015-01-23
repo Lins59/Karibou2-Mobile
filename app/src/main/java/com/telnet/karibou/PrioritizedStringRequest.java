@@ -37,6 +37,7 @@ public class PrioritizedStringRequest extends StringRequest {
         if (Method.POST == super.getMethod()) {
             headers.put("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8");
         }
+
         return headers;
     }
 }

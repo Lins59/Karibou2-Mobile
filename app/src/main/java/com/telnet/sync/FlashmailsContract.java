@@ -1,18 +1,16 @@
 package com.telnet.sync;
 
+import android.content.ContentResolver;
 import android.net.Uri;
 
 /**
  * Created by Pierre Quételart on 12/01/2015.
  */
 public class FlashmailsContract {
-    public static final String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/vnd.karibou.flashmail";
-    public static final String CONTENT_TYPE_DIR = "vnd.android.cursor.dir/vnd.karibou.flashmail";
+    public static final String CONTENT_ITEM_TYPE = ContentResolver.CURSOR_ITEM_BASE_TYPE + "/vnd.karibou.flashmail";
+    public static final String CONTENT_TYPE_DIR = ContentResolver.CURSOR_DIR_BASE_TYPE + "/vnd.karibou.flashmail";
 
-    public static final String AUTHORITY = "com.telnet.karibou.flashmails";
+    public static final String AUTHORITY = "com.telnet.karibou.provider";
     // content://<authority>/<path to type>
-    public static final Uri CONTENT_URI = Uri.parse("content://" + AUTHORITY);
-
-    public static final String FLASHMAILS_ID = "id";
-    public static final String FLASHMAILS_MESSAGE = "message";
+    public static final Uri CONTENT_URI = Uri.parse("content://" + AUTHORITY + "/flashmails");
 }

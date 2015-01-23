@@ -4,5 +4,5 @@
     android:allowParallelSyncs="false"
     android:contentAuthority="com.telnet.karibou.provider"
     android:isAlwaysSyncable="true"
-    android:supportsUploading="true"
+    android:supportsUploading="false"
     android:userVisible="true" />
