@@ -2,7 +2,6 @@ package com.telnet.parsers;
 
 import android.util.Log;
 
-import com.telnet.karibou.ColorFactory;
 import com.telnet.objects.Flashmail;
 import com.telnet.objects.User;
 
@@ -30,27 +29,14 @@ public class FlashmailParser {
 
                 String id = obj.getString("id");
                 String message = obj.getString("message");
+                Object oldMessage = obj.get("oldMessage");
+                Date date = formatter.parse(obj.getString("date"));
 
                 // Parse the pseudo
-                JSONObject author = obj.getJSONObject("author");
-
-                Date date = formatter.parse(obj.getString("date"));
-                Integer userId = author.getInt("id");
-                String pseudo;
-                if (!author.isNull("surname")) {
-                    pseudo = author.getString("surname");
-                } else {
-                    pseudo = (String) author.get("login");
-                }
-
-                // Get color
-                String color = ColorFactory.getColor(userId);
-
-                // Get old message if exists
-                Object oldMessage = obj.get("oldMessage");
+                User sender = UserParser.parseSingleUser(obj.getString("author"));
 
                 // Add flashmail
-                Flashmail fm = new Flashmail(id, new User(userId, pseudo, color), date, message);
+                Flashmail fm = new Flashmail(id, sender, date, message);
                 if (oldMessage instanceof String) {
                     fm.setOldMessage((String) oldMessage);
                 }

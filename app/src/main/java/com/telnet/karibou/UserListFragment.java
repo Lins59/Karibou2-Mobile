@@ -17,7 +17,7 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.telnet.adapters.UserListAdapter;
 import com.telnet.objects.User;
-import com.telnet.parsers.UserListParser;
+import com.telnet.parsers.UserParser;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -96,7 +96,7 @@ public class UserListFragment extends Fragment {
 
     public void setUsers(String json) {
         // Add users
-        List<User> users = UserListParser.parse(json);
+        List<User> users = UserParser.parse(json);
 
         // empty all elements
         adapter.clear();

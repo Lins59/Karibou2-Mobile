@@ -27,9 +27,6 @@ import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.TextView;
 
-import com.android.volley.Request;
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
 import com.telnet.adapters.FlashmailAdapter;
 import com.telnet.objects.Flashmail;
 import com.telnet.parsers.FlashmailParser;
@@ -125,7 +122,7 @@ public class FlashmailFragment extends Fragment {
         timer.schedule(doAsynchronousTask, 0, Constants.FLASHMAIL_REFRESH * 1000);*/
 
         // Get flashmail list ASAP
-        PrioritizedStringRequest flashmailsRequest = new PrioritizedStringRequest(Request.Method.GET, Constants.FLASHMAIL_URL, new Response.Listener<String>() {
+        /*PrioritizedStringRequest flashmailsRequest = new PrioritizedStringRequest(Request.Method.GET, Constants.FLASHMAIL_URL, new Response.Listener<String>() {
             @Override
             public void onResponse(String flashmails) {
                 setFlashmails(flashmails);
@@ -138,7 +135,7 @@ public class FlashmailFragment extends Fragment {
             }
         });
         flashmailsRequest.setPriority(Request.Priority.IMMEDIATE);
-        httpToolbox.addToRequestQueue(flashmailsRequest, "FM");
+        httpToolbox.addToRequestQueue(flashmailsRequest, "FM");*/
     }
 
     @Override

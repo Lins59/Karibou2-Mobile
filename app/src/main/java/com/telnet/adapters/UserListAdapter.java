@@ -10,6 +10,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.android.volley.toolbox.ImageLoader;
+import com.telnet.karibou.ColorFactory;
 import com.telnet.karibou.HttpToolbox;
 import com.telnet.karibou.ImageFactory;
 import com.telnet.karibou.R;
@@ -53,7 +54,7 @@ public class UserListAdapter extends ArrayAdapter<User> {
             message = user.getMessage();
         }
         // Parse user
-        String htmlUser = "<font color=\"" + user.getColor() + "\" >" +
+        String htmlUser = "<font color=\"" + ColorFactory.getColor(user.getId()) + "\" >" +
                 user.getPseudo() + "</font> " + "<i>" + away + message + "</i>" + "<br />";
 
         txtTitle.setText(Html.fromHtml(htmlUser));

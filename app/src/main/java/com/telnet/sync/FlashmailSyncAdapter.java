@@ -90,13 +90,6 @@ public class FlashmailSyncAdapter extends AbstractThreadedSyncAdapter {
                 curFlashmails.close();
             }
 
-            // See what Local flashmails are missing on Remote
-            /*ArrayList<TvShow> showsToRemote = new ArrayList<TvShow>();
-            for (TvShow localTvShow : localTvShows) {
-                if (!remoteTvShows.contains(localTvShow))
-                    showsToRemote.add(localTvShow);
-            }*/
-
             // See what Remote flashmails are missing on Local
             List<Flashmail> flashmailsToLocal = new ArrayList<Flashmail>();
             for (Flashmail remoteFlashmail : remoteFlashmails) {

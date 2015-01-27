@@ -9,6 +9,7 @@ import android.widget.ArrayAdapter;
 import android.widget.TableRow;
 import android.widget.TextView;
 
+import com.telnet.karibou.ColorFactory;
 import com.telnet.karibou.R;
 import com.telnet.objects.Flashmail;
 import com.telnet.objects.User;
@@ -45,7 +46,7 @@ public class FlashmailAdapter extends ArrayAdapter<Flashmail> {
 
         Flashmail flashmail = flashmails.get(position);
         User user = flashmail.getSender();
-        String htmlUser = "<font color=\"" + user.getColor() + "\" >" +
+        String htmlUser = "<font color=\"" + ColorFactory.getColor(user.getId()) + "\" >" +
                 user.getPseudo() + "</font>";
 
         senderView.setText(Html.fromHtml(htmlUser));
