@@ -24,6 +24,7 @@ import com.telnet.objects.Flashmail;
 import com.telnet.parsers.FlashmailParser;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -45,9 +46,28 @@ public class FlashmailSyncAdapter extends AbstractThreadedSyncAdapter {
         Log.d(TAG, " > onPerformSync");
         try {
             // Get the auth token for the current account
-            final String authToken = mAccountManager.blockingGetAuthToken(account, Constants.AUTHTOKEN_TYPE_FULL_ACCESS, true);
-            Log.d(TAG, "We have retrieved this authToken: " + authToken);
+            // Look for validity
+            boolean hasError = false;
+            Date validityTime = null, currentTime = null;
+            String authToken = mAccountManager.blockingGetAuthToken(account, Constants.AUTHTOKEN_TYPE_FULL_ACCESS, true);
+            try {
+                String timestamp = mAccountManager.getUserData(account, Constants.AUTHTOKEN_VALIDITY);
+                validityTime = new Date(Long.parseLong(timestamp));
+                currentTime = new Date();
+            } catch (NumberFormatException e) {
+                hasError = true;
+            }
+            // If we have no token, use the account credentials to fetch
+            // a new one, effectively another logon
+            // Cookie has expired
+            if (hasError || validityTime == null || currentTime == null || validityTime.before(currentTime)) {
+                Log.d(TAG, " > onPerformSync > Cookie has expired");
+                mAccountManager.invalidateAuthToken(Constants.ACCOUNT_TYPE, authToken);
+                authToken = mAccountManager.blockingGetAuthToken(account, Constants.AUTHTOKEN_TYPE_FULL_ACCESS, true);
+            }
 
+            Log.d(TAG, "We have retrieved this authToken: " + authToken);
+            final String authTokenFinal = authToken;
             StringRequest flashmailsRequest = new PrioritizedStringRequest(Request.Method.GET, Constants.FLASHMAIL_URL, new Response.Listener<String>() {
                 @Override
                 public void onResponse(String flashmails) {
@@ -64,7 +84,7 @@ public class FlashmailSyncAdapter extends AbstractThreadedSyncAdapter {
                 public Map<String, String> getHeaders() throws AuthFailureError {
                     Map<String, String> headers = new HashMap<String, String>(super.getHeaders());
                     headers.put("User-agent", "Lin's Droid Flashmail synchronizer");
-                    headers.put(Constants.COOKIE_KEY, authToken);
+                    headers.put(Constants.COOKIE_KEY, authTokenFinal);
                     return headers;
                 }
             };
