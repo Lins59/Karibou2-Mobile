@@ -23,6 +23,7 @@ import java.util.Date;
  * of its methods
  */
 public class AccountAuthenticator extends AbstractAccountAuthenticator {
+    private static TELnetAuthentication telnetAuthentication = new TELnetAuthentication();
     private String TAG = "AccountAuthenticator";
     private Context context;
 
@@ -73,7 +74,12 @@ public class AccountAuthenticator extends AbstractAccountAuthenticator {
             Log.d(TAG, " > getAuthToken > Cookie has expired");
             accountManager.invalidateAuthToken(Constants.ACCOUNT_TYPE, authToken);
 
-            return getAuthToken(response, account, authTokenType, options);
+            Bundle authBundle = telnetAuthentication.signIn(context, account.name, accountManager.getUserData(account, AccountManager.KEY_PASSWORD));
+            authToken = authBundle.getString(AccountManager.KEY_PASSWORD);
+            accountManager.setUserData(account, Constants.AUTHTOKEN_VALIDITY, authBundle.getString(Constants.AUTHTOKEN_VALIDITY));
+            accountManager.setUserData(account, Constants.AUTHTOKEN_PANTIE, authBundle.getString(Constants.AUTHTOKEN_PANTIE));
+
+            accountManager.setAuthToken(account, Constants.AUTHTOKEN_TYPE_FULL_ACCESS, authToken);
         }
 
 
